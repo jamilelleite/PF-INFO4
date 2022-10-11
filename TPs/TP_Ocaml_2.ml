@@ -131,12 +131,12 @@ let liste2 = liste_alea 14
 let time f x =
     let t = Sys.time() in
     let fx = f x in
-    Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
+    Printf.printf "Execution time: %f s\n" (Sys.time() -. t);
     fx
 
-let time_arbre = triABR liste1
+let time_arbre = time triABR liste1
 
-let time_liste = tri_selection_i liste1
+let time_liste = time tri_selection_i liste1
 
 (*Exercice 3.5*)
 
@@ -156,18 +156,19 @@ let rec renv_app: 'a list -> 'a list -> 'a list = fun l1 l2 -> match l1 with
 
 (*Exercice 3.7*)
 
-let liste10000 = liste_alea 10000000
+let liste10000 = liste_alea 10000
 
-let perf_renv = renv liste10000
+let perf_renv = time renv liste10000
 
-let perf_renv_app = renv_app liste10000 []
+let perf_renv_app = time renv_app liste10000 liste1
 
 (*Exercice 3.8*)
+let append: 'a list -> 'a list -> 'a list = fun  l1 l2 -> l1@l2
 
 let liste3 = liste_alea 20
 
-let listee = liste1@(liste2@liste3)
-let listee' = (liste1@liste2)@liste3
+let listee = time append liste1 (append liste2 liste3)
+let listee' = time append (append liste1 liste2) liste3
 
 (*Excercice 3.9*)
 
