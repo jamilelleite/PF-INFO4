@@ -162,6 +162,7 @@ let perf_renv = renv liste10000
 
 let perf_renv_app = renv_app liste10000 []
 
+(*Exercice 3.8*)
 let liste3 = liste_alea 20
 
 let listee = liste1@(liste2@liste3)
