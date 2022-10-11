@@ -34,7 +34,7 @@ let rec min_list: 'a list -> 'a = fun l -> match l with
                                                     let l2 = splitright x a in
                                                    concat l1 l2
  (*Fonctions arbre*)
- type abin = Feuille | Noeuds of abin*int*abin
+ type abin = Feuille | Noeuds of abin*int*abins
   let rec insert : abin -> int -> abin = fun a b -> match a with
                                                    |Feuille -> Noeuds(Feuille, b, Feuille)
                                                    |Noeuds(g,n,d) -> if(b>n) then Noeuds(g,n,insert d b) else Noeuds(insert g b,n,d)
@@ -83,7 +83,7 @@ let rec tri_selection : ('a -> 'a -> bool) -> 'a list -> 'a list = fun (f:'a -> 
                                                                                                                                      |[] -> []
                                                                                                                                      |h::b -> tri_selection (f h a) b
 
-let tri_selection_i: 'a list -> 'a list = fun l -> tri_selection (<) l;;
+let tri_selection_i: 'a list -> 'a list = fun l -> tri_selection (<) l
 
 tri_selection (<) b
 
@@ -103,3 +103,7 @@ let time f x =
     let fx = f x in
     Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
     fx
+
+let time_arbre = triABR liste1
+
+let time_liste = tri_selection_i liste1
