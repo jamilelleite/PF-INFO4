@@ -34,6 +34,18 @@ let rec min_list: 'a list -> 'a = fun l -> match l with
                                                     let l2 = splitright x a in
                                                    concat l1 l2
  (*Exercice 26*)
+ (*Teacher's solution*)
+ let rec trouve_min_i: 'a list -> 'a * 'a list =
+   fun l ->
+   match l with
+   | [] -> (max_int, []) (*pas possible, liste non vide*)
+   | head::[] -> (head, [])
+   | head::body ->
+      let (a, l) = trouve_min_i body in
+      if head < a then (head, a::l) else (a, head::l);;
+
+trouve_min_i b;;
+ 
 let rec aux : 'a list -> 'a -> 'a list -> 'a * 'a list = fun la a lb -> match la with
                                                                          |[] -> (a, lb)
                                                                          |h::b -> if h<a then aux b h (a::lb) else aux b a (h::lb)
