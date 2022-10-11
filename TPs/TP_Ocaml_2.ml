@@ -148,6 +148,21 @@ let renv: 'a list -> 'a list = fun l -> renv_aux [] l
 
 
 (*Exercice 3.6*)
-let renv_eff: 'a list -> 'a list -> 'a list = fun l1 l2 ->
+let rec renv_app: 'a list -> 'a list -> 'a list = fun l1 l2 -> match l1 with
+                                                           |[] -> l2
+                                                           |h::t -> renv_app (h::l2) t
 
+(*En utilisant renv_app avec une liste vide*)
 
+(*Exercice 3.7*)
+
+let liste10000 = liste_alea 10000000
+
+let perf_renv = renv liste10000
+
+let perf_renv_app = renv_app liste10000 []
+
+let liste3 = liste_alea 20
+
+let listee = liste1@(liste2@liste3)
+let listee' = (liste1@liste2)@liste3
