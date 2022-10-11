@@ -151,3 +151,23 @@ let renv: 'a list -> 'a list = fun l -> renv_aux [] l
 let renv_eff: 'a list -> 'a list -> 'a list = fun l1 l2 ->
 
 
+
+
+
+
+
+
+
+(*Excercice 3.9*)
+
+let rec dromadaire: 'a list -> ('a -> 'a -> bool) -> 'a =
+  fun l comp ->
+  match l with
+  | head::body -> let s = dromadaire body comp in
+                  if comp head s then head else s
+  | [] -> if comp 0 max_int then max_int else min_int;;
+
+dromadaire a (<);;
+dromadaire a (>);;
+dromadaire b (<);;
+dromadaire b (>);;
