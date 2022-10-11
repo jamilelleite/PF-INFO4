@@ -123,7 +123,7 @@ let rec liste_alea: 'a -> 'a list = fun a -> let n = Random.int 20000000 in matc
                                                                              |i -> n::(liste_alea (i-1))
 
 
-(*Exercice 29*)
+(*Exercice 3.4*)
 
 let liste1 = liste_alea 8
 let liste2 = liste_alea 14
