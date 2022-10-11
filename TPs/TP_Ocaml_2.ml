@@ -32,7 +32,30 @@ let rec min_list: 'a list -> 'a = fun l -> match l with
  
  let split: 'a list -> 'a -> 'a list = fun x a -> let l1 = splitleft x a in
                                                     let l2 = splitright x a in
-                                                   concat l1 l2
+                                                    concat l1 l2
+  (*Fonctions arbre*)
+ type abin = Feuille | Noeuds of abin*int*abin
+  let rec insert : abin -> int -> abin = fun a b -> match a with
+                                                   |Feuille -> Noeuds(Feuille, b, Feuille)
+                                                   |Noeuds(g,n,d) -> if(b>n) then Noeuds(g,n,insert d b) else Noeuds(insert g b,n,d)
+  let rec insertABR : 'a list -> abin -> abin = fun l a -> match l with
+                                                     |[] -> a
+                                                     |x::t -> insertABR t (insert a x)
+  let rec insertList: 'a list -> int -> 'a list = fun l a -> match l with
+                                                        |[] -> a::[]
+                                                        |i::x -> i::insertList x a
+
+ let rec concatliste : 'a list -> 'a list -> 'a list = fun l p -> match l with
+                                                            |[] -> p
+                                                            |x::[] -> x::p
+                                                            |s::o -> s::concatliste o p
+ 
+ let rec parcour : abin -> 'a list = fun a -> match a with
+                                             |Feuille -> []
+                                             |Noeuds(g,n,d) -> concatliste (insertList (parcour g) n) (parcour d)
+ let triABR: 'a list -> 'a list = fun l -> match l with
+                                       |[] -> []
+                                       |x::k -> parcour (insertABR k Feuille)
  (*Exercice 3.1*)
  (*Teacher's solution*)
  let rec trouve_min_i: 'a list -> 'a * 'a list =
@@ -73,8 +96,6 @@ let rec trouve_min: ('a -> 'a -> bool) -> 'a list -> 'a * 'a list = fun (f:'a ->
 
 let rec trouve_min_i_recc: 'a list -> int * int list = fun l -> trouve_min (<) l
 
-let _ = assert (trouve_min_i a = (1,[2;3;4;5;6]));;
-
 trouve_min_i_recc a;;
 
 trouve_min (<) a
@@ -98,7 +119,18 @@ let rec liste_alea: 'a -> 'a list = fun a -> let n = Random.int 20000000 in matc
 
 (*Exercice 29*)
 
+let liste1 = liste_alea 8
+let liste2 = liste_alea 14
 
+let time f x =
+    let t = Sys.time() in
+    let fx = f x in
+    Printf.printf "Execution time: %fs\n" (Sys.time() -. t);
+    fx
+
+let time_arbre = triABR liste1
+
+let time_liste = tri_selection_i liste1
 
 
 
