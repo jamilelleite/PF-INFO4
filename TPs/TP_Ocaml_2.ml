@@ -79,15 +79,21 @@ trouve_min_i_recc a;;
 
 trouve_min (<) a
 
-(*Exercice 27*)
+(*Exercice 3.2*)
 
-let rec tri_selection : ('a -> 'a -> bool) -> 'a list -> 'a list = fun (f:'a -> 'a -> bool) (l:'a list) -> let (a,b) = trouve_min f l in match l with
-                                                                                                                                     |[] -> []
-                                                                                                                                     |h::b ->  ;;
+let rec tri_selection : ('a -> 'a -> bool) -> 'a list -> 'a list =
+  fun f l ->
+  match l with
+  | [] -> []
+  | _ -> let (min, newl) = trouve_min f l in
+             min::(tri_selection f newl);;
+
+tri_selection (<) a;;
+tri_selection (>) b;;
 
 let tri_selection_i: 'a list -> 'a list = fun l -> tri_selection (<) l;;
 
-tri_selection (<) b
+tri_selection_i a;;
 
 (*Exercice 28*)
 
