@@ -138,7 +138,16 @@ let time_arbre = triABR liste1
 
 let time_liste = tri_selection_i liste1
 
+(*Exercice 3.5*)
+
+let rec renv_aux: 'a list -> 'a list -> 'a list = fun l1 l2 -> match l2 with
+                                                           |[] -> l1
+                                                           |x::y -> renv_aux (x::l1) y
+
+let renv: 'a list -> 'a list = fun l -> renv_aux [] l
 
 
+(*Exercice 3.6*)
+let renv_eff: 'a list -> 'a list -> 'a list = fun l1 l2 ->
 
 
