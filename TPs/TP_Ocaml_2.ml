@@ -1,3 +1,7 @@
+(*Jamile Lima Leite*)
+(*Kemgne Nasah Darryl Jordan*)
+
+
 (*Echauffement*)
 let rec somme_all: 'a list -> int = fun a -> match a with
                                              |[] -> 0
