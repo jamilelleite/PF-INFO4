@@ -61,7 +61,6 @@ let rec min_list: 'a list -> 'a = fun l -> match l with
                                        |[] -> []
                                        |x::k -> parcour (insertABR k Feuille)
  (*Exercice 3.1*)
- (*Teacher's solution*)
  let rec trouve_min_i: 'a list -> 'a * 'a list =
    fun l ->
    match l with
@@ -84,25 +83,6 @@ let rec min_list: 'a list -> 'a = fun l -> match l with
 
   trouve_min (<) b;;
   trouve_min (>) a;;
-
- 
-let rec aux : 'a list -> 'a -> 'a list -> 'a * 'a list = fun la a lb -> match la with
-                                                                         |[] -> (a, lb)
-                                                                         |h::b -> if h<a then aux b h (a::lb) else aux b a (h::lb)
-let rec trouve_min_i: 'a list -> ('a * 'a list) = fun k -> match k with
-                                                         |[] -> (max_int, [])
-                                                         |x::y -> (min_list k, (split k (min_list k)))
-
-let rec trouve_min: ('a -> 'a -> bool) -> 'a list -> 'a * 'a list = fun (f:'a -> 'a -> bool) (l:'a list) -> match l with
-                                                                           |[] -> (max_int,[])
-                                                                           |x::[] -> (x,[])
-                                                                           |x::l -> let (y,l1) = trouve_min f l in if f x y then (x, y::l1) else (y, x::l1)
-
-let rec trouve_min_i_recc: 'a list -> int * int list = fun l -> trouve_min (<) l
-
-trouve_min_i_recc a;;
-
-trouve_min (<) a
 
 (*Exercice 3.2*)
 
