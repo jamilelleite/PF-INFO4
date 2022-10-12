@@ -183,4 +183,29 @@ dromadaire a (<);;
 dromadaire a (>);;
 dromadaire b (<);;
 dromadaire b (>);;
->>>>>>> 10a8311620f283e8a011ef25dc4d0a71a19cbe55
+
+(*Exercice 3.10*)
+
+let rec chameau_i: 'a list -> ('a -> 'a -> bool) -> ('a * 'a) =
+  fun l comp ->
+  match l with
+  | [] -> if comp 0 max_int then (max_int, max_int) else (min_int, min_int)
+  | head::body -> let (b, s) = chameau_i body comp in (*the first element in the tuple is*)
+                  if comp head b then               (*going to be the bigger/smaller element*)
+                    (head, b)
+                  else
+                    if comp head s then
+                      (b, head)
+                    else
+                      (b, s);;
+
+let a = [1;2;3;1;4;5;6];;
+let b = [12;52;65;84;36;69;42;95;11];;
+
+chameau_i a (>);;
+chameau_i b (<);;
+
+let chameau = fun l -> chameau_i l (>);;
+
+chameau a;;
+chameau b;;
