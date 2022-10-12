@@ -19,24 +19,6 @@ let rec concat: 'a list -> 'a list -> 'a list = fun a b -> match a with
 let a = [1;2;3;1;4;5;6]
 let b = [12;52;65;84;36;69;42;95;11]
 
-(*Auxiliare*)
-
-let min: 'a -> 'a -> 'a = fun a b -> if (a < b) then a else b
-
-let rec min_list: 'a list -> 'a = fun l -> match l with
-                                           |[] -> max_int
-                                           |x::y -> min x (min_list y)
- let rec splitleft : 'a list -> 'a -> 'a list = fun l x -> match l with
-                                                    |[] -> failwith "Cette élément n'est pas dans la liste"
-                                                    |y::s -> if x = y
-                                                                  then [] else y::splitleft s x 
- let rec splitright : 'a list -> 'a -> 'a list = fun l x -> match l with
-                                                     |[] -> failwith "Cette élément n'est pas dans la liste"
-                                                     |y::s -> if x = y then s else splitright s x
- 
- let split: 'a list -> 'a -> 'a list = fun x a -> let l1 = splitleft x a in
-                                                    let l2 = splitright x a in
-                                                    concat l1 l2
   (*Fonctions arbre*)
  type abin = Feuille | Noeuds of abin*int*abin
   let rec insert : abin -> int -> abin = fun a b -> match a with
