@@ -120,12 +120,18 @@ let rec extrait: 'a fap -> ('a * 'a fap) =
 
 let rec enfile_croissant : int -> 'a list -> 'a fap =
   fun n l  -> match l with
-              |[] -> failwith "empty"
-              |a::[] -> (a,n)::[]
-               |h::t -> (h,n)::(enfile_croissant (n+1) t);;
+              |[] -> []
+              |h::t -> (h,n)::(enfile_croissant (n+1) t);;
 
 let list_testing = [1;2;3;4;5];;
 enfile_croissant 100 list_testing;;
+
+let rec fap_to_list: 'a fap -> 'a list = fun f ->
+  match f with
+  |[] -> []
+  |(a,b)::c -> a::(fap_to_list c);;
+
+fap_to_list (enfile_croissant 100 list_testing);;
 
 
 (*Exercice 4.6*)
