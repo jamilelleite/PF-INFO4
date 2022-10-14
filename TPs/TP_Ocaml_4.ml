@@ -1,3 +1,6 @@
+(*Jamile Lima Leite*)
+(*Kemgne Nasah Darryl Jordan*)
+
 (*4 File et file à priorités*)
 (*4.1 Structure de file*)
 
@@ -67,13 +70,21 @@ let est_file_vide: 'a file2 -> bool = fun f2 ->
 let enfiler2: 'a -> 'a file2 -> 'a file2 = fun a f2 ->
   let (l1,l2) = f2 in (conversion_fl (enfile a (conversion_lf l1)),l2);;
 
+let rec insert: 'a -> 'a list -> 'a list = fun n l ->
+  match l with
+  |[] -> n::[]
+  |h::b -> h::(insert n b);;
+
+let rec list_reverse: 'a list -> 'a list = fun l ->
+  match l with
+  |[] -> []
+  |h::b -> let n = list_reverse b in insert h n;;
+
 let rec defiler2: 'a file2 -> ('a * 'a file2) = fun f2 ->
   let (l1,l2) = f2 in
   match l2 with
      |h::t -> (h,(l1,t))
-     |[] -> let (a,l) = defiler2([],l1) in (a,l)
-;;
-
+     |[] -> let (a,l) = defiler2([],list_reverse l1) in (a,l);;
 
 (*Exercice 4.4*)
 
