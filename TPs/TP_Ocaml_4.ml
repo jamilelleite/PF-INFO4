@@ -1,38 +1,59 @@
 (*4 File et file à priorités*)
 (*4.1 Structure de file*)
 
-type 'a file = 'a list
+type 'a file = Vide | Stack of 'a * 'a file
 
 let est_file_vide : 'a file -> bool = fun f -> match f with
-                                                 |[] -> true
+                                                 |Vide -> true
                                                  |_ -> false
 
-let file_vide = []
+let file_vide = Vide
 
 let enfile : 'a -> 'a file -> 'a file =
   fun a f ->
   match f with
-  |[] -> a::[]
-  |b::c -> a::b::c
+  |Vide -> Stack(a,Vide)
+  |Stack(b,c) -> Stack(a,Stack(b,c))
 
 let rec defile: 'a file -> ('a * 'a file) =
   fun f ->
   match f with
-  |[] -> failwith "empty"
-  |x::[] -> (x,[]) 
-  |i::l -> let (x,y) = defile l in (x,i::y)
+  |Vide -> failwith "empty"
+  |Stack(x,Vide) -> (x,Vide) 
+  |Stack(i,l) -> let (x,y) = defile l in (x,Stack(i,y))
 
 let test = [1;5;88;85;64] ;;
 
-let file1 = enfile 6 (enfile 4 []);;
+let file1 = enfile 6 (enfile 4 Vide);;
 
 enfile 6 test;;
 
 defile test;;
- let test2 = [];;
+ let test2 = Vide;;
 defile test2;;
 
 (*Exercice 4.2*)
+
+let rec conversion_lf: 'a list -> 'a file =
+  fun l -> match l with
+           |[] -> Vide
+           |h::t -> let e = conversion_lf t in Stack(h,e);;
+
+
+let testfile = conversion_lf test;;
+
+let rec conversion_fl: 'a file -> 'a list =
+  fun f ->
+  match f with
+  |Vide -> []
+  |Stack(a,b) -> let e = conversion_fl b in a::e;;
+
+conversion_fl testfile;;
+
+let test_file: 'a list -> bool =
+  fun l ->(conversion_fl (conversion_lf l) = l);;
+
+test_file test;;
 
 (*Exercice 4.3*)
 
@@ -40,8 +61,7 @@ defile test2;;
 
 (*Exercice 4.5*)
 
-
-
+(*Exercice 4.6*)
 
 
 
