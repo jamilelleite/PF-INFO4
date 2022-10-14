@@ -24,11 +24,30 @@ let rec defile: 'a file -> ('a * 'a file) =
 
 let test = [1;5;88;85;64] ;;
 
+let file1 = enfile 6 (enfile 4 []);;
+
 enfile 6 test;;
 
 defile test;;
  let test2 = [];;
 defile test2;;
+
+(*Exercice 4.2*)
+
+(*Exercice 4.3*)
+
+(*Exercice 4.4*)
+
+(*Exercice 4.5*)
+
+
+
+
+
+
+
+
+
 
 
 
