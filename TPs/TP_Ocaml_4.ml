@@ -57,6 +57,24 @@ test_file test;;
 
 (*Exercice 4.3*)
 
+type 'a file2 = 'a list * 'a list
+
+let file_vide2: 'a file2 = ([],[])
+
+let est_file_vide: 'a file2 -> bool = fun f2 ->
+  let (l1,l2) = f2 in if(l1=[] && l2=[]) then true else false
+
+let enfiler2: 'a -> 'a file2 -> 'a file2 = fun a f2 ->
+  let (l1,l2) = f2 in (conversion_fl (enfile a (conversion_lf l1)),l2);;
+
+let rec defiler2: 'a file2 -> ('a * 'a file2) = fun f2 ->
+  let (l1,l2) = f2 in
+  match l2 with
+     |h::t -> (h,(l1,t))
+     |[] -> let (a,l) = defiler2([],l1) in (a,l)
+;;
+
+
 (*Exercice 4.4*)
 
 (*Exercice 4.5*)
