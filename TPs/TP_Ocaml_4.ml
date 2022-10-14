@@ -95,19 +95,19 @@ defiler2 (enfiler2 4 (enfiler2 3 (enfiler2 1 file2_test)));;
 
 (*Exercice 4.4*)
 
-type 'a fap = Vide | Fap of 'a * int * 'a fap
+type 'a fap = ('a * 'a) list
 
-let fap_vide: 'a fap = Vide
+let fap_vide: 'a fap = []
 
 let est_fap_vide: 'a fap -> bool =
   fun fa -> match fa with
-            |Vide -> true
+            |[] -> true
             |_ -> false
 
 let rec insere: 'a -> int -> 'a fap -> 'a fap =
   fun x p fa -> match fa with
-                |Vide -> Fap (x,p,Vide)
-                |Fap(a,b,c) -> Fap(a,b,insere(x,p,c))
+                |[] -> (x,p)::[]
+                |(a,b)::c -> (a,b)::insere x p c
 
 (*Exercice 4.5*)
 
