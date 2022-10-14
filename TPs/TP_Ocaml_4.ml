@@ -77,6 +77,20 @@ let rec defiler2: 'a file2 -> ('a * 'a file2) = fun f2 ->
 
 (*Exercice 4.4*)
 
+type 'a fap = Vide | Fap of 'a * int * 'a fap
+
+let fap_vide: 'a fap = Vide
+
+let est_fap_vide: 'a fap -> bool =
+  fun fa -> match fa with
+            |Vide -> true
+            |_ -> false
+
+let rec insere: 'a -> int -> 'a fap -> 'a fap =
+  fun x p fa -> match fa with
+                |Vide -> Fap (x,p,Vide)
+                |Fap(a,b,c) -> Fap(a,b,insere(x,p,c))
+
 (*Exercice 4.5*)
 
 (*Exercice 4.6*)
