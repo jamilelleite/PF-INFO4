@@ -68,7 +68,10 @@ let est_file_vide: 'a file2 -> bool = fun f2 ->
   let (l1,l2) = f2 in if(l1=[] && l2=[]) then true else false
 
 let enfiler2: 'a -> 'a file2 -> 'a file2 = fun a f2 ->
-  let (l1,l2) = f2 in (conversion_fl (enfile a (conversion_lf l1)),l2);;
+  let (l1,l2) = f2 in
+  match l1 with
+  |[] -> (a::[],l2)
+  |h::b -> (a::h::b,l2);;
 
 let rec insert: 'a -> 'a list -> 'a list = fun n l ->
   match l with
@@ -86,17 +89,12 @@ let rec defiler2: 'a file2 -> ('a * 'a file2) = fun f2 ->
      |h::t -> (h,(l1,t))
      |[] -> let (a,l) = defiler2([],list_reverse l1) in (a,l);;
 
+let file2_test = ([],[]);;
+enfiler2 4 (enfiler2 3 (enfiler2 1 file2_test));;
+defiler2 (enfiler2 4 (enfiler2 3 (enfiler2 1 file2_test)));;
+
 (*Exercice 4.4*)
 
 (*Exercice 4.5*)
 
 (*Exercice 4.6*)
-
-
-
-
-
-
-
-
-
