@@ -95,7 +95,7 @@ defiler2 (enfiler2 4 (enfiler2 3 (enfiler2 1 file2_test)));;
 
 (*Exercice 4.4*)
 
-type 'a fap = ('a * 'a) list
+type 'a fap = ('a * int) list
 
 let fap_vide: 'a fap = []
 
@@ -107,8 +107,22 @@ let est_fap_vide: 'a fap -> bool =
 let rec insere: 'a -> int -> 'a fap -> 'a fap =
   fun x p fa -> match fa with
                 |[] -> (x,p)::[]
-                |(a,b)::c -> (a,b)::insere x p c
+                |(a,b)::c -> if(b>p) then
+                               (a,b)::insere x p c else
+                               (x,p)::(a,b)::c
+
+let rec extrait: 'a fap -> ('a * 'a fap) =
+  fun fa -> match fa with
+            |[] -> failwith "empty file"
+            |(a,p)::d -> (a,d)
 
 (*Exercice 4.5*)
+
+let enfile_croissant : int * 'a list -> 'a fap -> 'a fap =
+  fun n l fa  -> match l with
+               |[] -> fa
+               |h::t -> Fap((
+
+let test_fap : 'a list -> bool = fun l -> 
 
 (*Exercice 4.6*)
