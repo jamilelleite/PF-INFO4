@@ -118,11 +118,14 @@ let rec extrait: 'a fap -> ('a * 'a fap) =
 
 (*Exercice 4.5*)
 
-let enfile_croissant : int * 'a list -> 'a fap -> 'a fap =
-  fun n l fa  -> match l with
-               |[] -> fa
-               |h::t -> Fap((
+let rec enfile_croissant : int -> 'a list -> 'a fap =
+  fun n l  -> match l with
+              |[] -> failwith "empty"
+              |a::[] -> (a,n)::[]
+               |h::t -> (h,n)::(enfile_croissant (n+1) t);;
 
-let test_fap : 'a list -> bool = fun l -> 
+let list_testing = [1;2;3;4;5];;
+enfile_croissant 100 list_testing;;
+
 
 (*Exercice 4.6*)
