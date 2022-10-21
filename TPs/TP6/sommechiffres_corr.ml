@@ -95,11 +95,13 @@ let rec sommechiffres : int ranalist =
      try au_moins_un l with Echec -> aucun l
 
 (*Exercice 8.1 part 4, horner with error*)
-let rec horner : int -> int ranalist -> (int -> int ranalist) =
-  fun a l -> let rec au_moins_un : int ranalist = fun l ->
+let rec horner : int -> int ranalist =
+  let rec au_moins_un :int -> int ranalist = fun a l ->
                   let x, l = un_chiffre l in
                   let n, l = horner (a*10+x) l in (n, l)
-
+             and aucun  : int ->  int ranalist = fun a -> epsilon_res a
+             in fun a l->
+                try au_moins_un a l with Echec -> aucun a l
 
 (*Exercice 8.3*)
 
