@@ -93,3 +93,22 @@ let rec sommechiffres : int ranalist =
   and aucun : int ranalist = epsilon_res 0
   in fun l ->
      try au_moins_un l with Echec -> aucun l
+
+(*Exercice 8.1 part 4, horner with error*)
+let rec horner : int -> int ranalist -> (int -> int ranalist) =
+  fun a l -> let rec au_moins_un : int ranalist = fun l ->
+                  let x, l = un_chiffre l in
+                  let n, l = horner (a*10+x) l in (n, l)
+
+
+(*Exercice 8.3*)
+
+let readfile : string -> string = fun nomfic ->
+  let ic = open_in nomfic in
+  really_input_string ic (in_channel_length ic)
+
+
+
+
+
+
