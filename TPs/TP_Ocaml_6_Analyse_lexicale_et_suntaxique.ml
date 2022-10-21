@@ -1,4 +1,0 @@
-(*Préliminaires*)
-
-(*Connect6*)
-
