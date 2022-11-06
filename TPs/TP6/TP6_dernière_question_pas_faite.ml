@@ -109,29 +109,6 @@ let readfile : string -> string = fun nomfic ->
   let ic = open_in nomfic in
   really_input_string ic (in_channel_length ic)
 
-
-(* Le type des fonctions qui épluchent une liste de terminaux *)
-type 'term analist = 'term list -> 'term list
-
-(* ------------------------------------------------------------ *)
-(* Combinateurs d'analyseurs purs *)
-(* ------------------------------------------------------------ *)
-
-(* a suivi de b *)
-let (-->) (a : analist) (b : analist) : analist =
-  fun l -> let l = a l in b l
-
-(* Choix entre a ou b *)
-let (-|) (a : analist) (b : analist) : analist =
-  fun l -> try a l with Echec -> b l
-
-(* Répétition (étoile de Kleene) *)
-(* Grammaire :  A* ::=  A A* | ε *)
-let rec star (a : analist) : analist = fun l -> l |>
-  ( a --> star a ) -| epsilon
-
-let _ = star (terminal 'x') (list_of_string "xxx-reste")
-
 type coul = Noir | Blanc;;
 
 type coup = char * coul * int * int * char;;
@@ -297,7 +274,7 @@ let _ = joue_coup p c
 
 (**Question 6: Fonction resultat**)
 
-let rec align_V6 : pion list list -> int -> pion -> pion * bool = fun pl n p ->
+let rec align_V6 : pion list list -> int -> int -> pion -> pion * bool = fun pl n j p ->
   if(List.length pl >= n) then (match pl with
                                 |x::l when (n>0 && ((List.length x) > j)) -> let p'=(List.nth x j) in if(p' = p) then align_V6 l (n-1) j p
                                                                                                       else align_V6 l 5 j p'
