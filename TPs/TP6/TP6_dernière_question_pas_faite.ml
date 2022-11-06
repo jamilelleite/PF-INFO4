@@ -297,7 +297,16 @@ let _ = joue_coup p c
 
 (**Question 6: Fonction resultat**)
 
-let rec 
+let rec align_V6 : pion list list -> int -> pion -> pion * bool = fun pl n p ->
+  if(List.length pl >= n) then (match pl with
+                                |x::l when (n>0 && ((List.length x) > j)) -> let p'=(List.nth x j) in if(p' = p) then align_V6 l (n-1) j p
+                                                                                                      else align_V6 l 5 j p'
+                                |x::l when n = 0 -> (p, true)
+                                |[] when n = 0 -> (p, true)
+                                |_ -> (p,false))
+  else (R,false);;
+
+let _ = align_V6 [[B];[N];[B];[B];[B];[B];[B];[B]] 6 0 B;;
 
 
 
