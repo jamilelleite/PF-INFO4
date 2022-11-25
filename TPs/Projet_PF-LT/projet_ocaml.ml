@@ -40,7 +40,33 @@ let wh: wbm = MWhile(Exp A, if0_0)
 
 (* Exercice 1.1.2 *)
 
+(*
 
+C::= '0' | '1'
+V::= 'a' | 'b' | 'c' | 'd'
+A::= C | V
+WBM::= V ':=' A ';' 
+     | WBM WBM
+     | 'i(' A '){' WBM '}'
+     | 'w(' A '){' WBM '}'
+     | e
+
+ *)
+
+(* Exercice 1.1.3 *)
+
+(*
+C::= '0' | '1'
+V::= 'a' | 'b' | 'c' | 'd'
+A::= C | V
+WBM::= D 
+     | D WBM
+     | 'i(' A '){' WBM '}'
+     | 'w(' A '){' WBM '}'
+D::= e
+   | V ':=' A ';'
+
+ *)
 
 
 
