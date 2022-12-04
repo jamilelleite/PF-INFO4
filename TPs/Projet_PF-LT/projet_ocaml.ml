@@ -11,8 +11,8 @@ type bmvar =
 
 type bmexp =
   | Exp of bmvar
-  | O (*false*)
-  | L (*true*)
+  | F (*false*)
+  | T (*true*)
 
 type wbm =
   | MSkip 
@@ -23,11 +23,11 @@ type wbm =
 
 
 
-let if1_1: wbm = MAssign(C, O)
+let if1_1: wbm = MAssign(C, T)
 
 let if1_2: wbm = MAssign(A, Exp B)
 
-let if2_1: wbm = MAssign(B, O)
+let if2_1: wbm = MAssign(B, T)
 
 let if2_2: wbm = MAssign(C, Exp A)
 
@@ -85,6 +85,43 @@ let (-|) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
 let rec star (a : 'term analist) : 'term analist = fun l -> l |>
   ( a --> star a ) -| epsilon
 
+(* ------------------------------------------------------------ *)
+(* Combinateurs d'analyseurs
+   avec calcul supplémentaire, ex. d'un AST *)
+(* ------------------------------------------------------------ *)
+
+(* Le type des aspirateurs qui, en plus, rendent un résultat *)
+type ('res, 'term) ranalist = 'term list -> 'res * 'term list
+
+(* Un epsilon informatif *)
+let epsilon_res (info : 'res) : ('res, 'term) ranalist =
+  fun l -> (info, l)
+
+(* Terminal conditionnel avec résultat *)
+(* [f] ne retourne pas un booléen mais un résultat optionnel *)
+let terminal_res (f : 'term -> 'res option) : ('res, 'term) ranalist =
+  fun l -> match l with
+  | x :: l -> (match f x with Some y -> y, l | None -> raise Echec)
+  | _ -> raise Echec
+
+(* a1 sans résultat suivi de a2 donnant un résultat *)
+let ( -+>) (a1 : 'term analist) (a2 : ('res, 'term) ranalist) :
+      ('res, 'term) ranalist =
+  fun l -> let l = a1 l in a2 l
+
+(* a1 rendant un résultat suivi de a2 rendant un résultat *)
+let (++>) (a1 : ('resa, 'term) ranalist) (a2 : 'resa -> ('resb, 'term) ranalist) :
+      ('resb, 'term) ranalist =
+  fun l -> let (x, l) = a1 l in a2 x l
+
+(* a1 rendant un résultat suivi de a2 sans résultat est peu utile *)
+
+(* Choix entre a1 ou a2 informatifs *)
+let (+|) (a1 : ('res, 'term) ranalist) (a2 : ('res, 'term) ranalist) :
+      ('res, 'term) ranalist =
+  fun l -> try a1 l with Echec -> a2 l
+
+
 
 (* Exercice 1.1.2 *)
 
@@ -111,8 +148,8 @@ C::= '0' | '1'
 V::= 'a' | 'b' | 'c' | 'd'
 A::= C | V
 F::= V ':=' A H
-     | 'i(' A '){' F '}{' F '}' I
-     | 'w(' A '){' F '}' I
+     | 'i(' A '){' I '}{' I '}' I
+     | 'w(' A '){' I '}' I
 H::= ; F
      | eps
 I::= F
@@ -148,3 +185,32 @@ and p_I : char analist = fun l -> l |>
 
 let _ = p_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{b:=0;c:=a}}")
 let _ = p_F (list_of_string "a:=1;b:=1;")
+
+let pr_V: (bmvar, char) ranalist =
+  (terminal 'a' -+> epsilon_res (A))
+  +| (terminal 'b' -+> epsilon_res (B))
+  +| (terminal 'c' -+> epsilon_res (C))
+  +| (terminal 'd' -+> epsilon_res (D))
+
+let pr_C: (bmexp, char) ranalist =
+  (terminal '0' -+> epsilon_res (F))
++| (terminal '1' -+> epsilon_res (T))
+
+let _ = pr_F (list_of_string "a:=0")
+
+let pr_A: (bmexp, char) ranalist =
+  (pr_C)
+  +| (pr_V ++> fun a -> epsilon_res (Exp a))
+
+let rec pr_F: (wbm, char) ranalist = fun l -> l |>
+  (pr_V ++> fun a -> terminal ':' --> terminal '=' -+> pr_A ++> fun b -> pr_H ++> fun c -> epsilon_res (MSeq((MAssign(a, b)),c)))
+  +| (terminal 'i' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' --> terminal '{' -+> pr_I ++> fun c -> terminal '}' -+> pr_I ++> fun d -> epsilon_res (MSeq(MIf (a, b, c), d)))
+  +| (terminal 'w' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' -+> pr_I ++> fun d -> epsilon_res (MSeq(MWhile(a,b), d)))
+and pr_H: (wbm, char) ranalist = fun l -> l |>
+  (terminal ';' -+> pr_F ++> fun a -> epsilon_res (a))
+  +| epsilon_res MSkip
+and pr_I: (wbm, char) ranalist = fun l -> l |>
+  (pr_F)
+  +| epsilon_res MSkip
+
+let _ = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{}}a:=1;")
