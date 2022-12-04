@@ -40,6 +40,7 @@ let if0_0: wbm = MIf(Exp C, if1, if2)
 let wh: wbm = MWhile(Exp A, if0_0)
 
 
+        
 (* Analyse descendante récursive sur une liste avec des combinateurs *)
 
 (* Utilitaire pour les tests *)
@@ -156,6 +157,28 @@ I::= F
      | eps
  *)
 
+  (* Exercice 1.2.1 *)
+          
+(* if exp then P else Q.
+
+                                 P              if exp then P else Q
+          [[expr]]s1 = true   s1 ---> s2     s2 -----------------------> s3
+       ---------------------------------------------------------------------
+                       if exp then P else Q 
+                S1 --------------------------> s3
+
+
+                                    Q              if exp then P else Q
+          [[expr]]s1 = false   s1 ----> s2     s2 -----------------------> s3
+       ---------------------------------------------------------------------
+                       if exp then P else Q 
+                S1 --------------------------> s3
+
+
+
+ *)
+
+
 let p_C : char analist =
   (terminal '0')
   -| (terminal '1')
@@ -184,9 +207,11 @@ and p_I : char analist = fun l -> l |>
 
 
 let _ = p_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{b:=0;c:=a}}")
+let _ = p_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;c:=a}c:=0}{b:=0;c:=a}}")
 let _ = p_F (list_of_string "a:=1;b:=1;")
 
 let pr_V: (bmvar, char) ranalist =
+  
   (terminal 'a' -+> epsilon_res (A))
   +| (terminal 'b' -+> epsilon_res (B))
   +| (terminal 'c' -+> epsilon_res (C))
@@ -196,16 +221,18 @@ let pr_C: (bmexp, char) ranalist =
   (terminal '0' -+> epsilon_res (F))
 +| (terminal '1' -+> epsilon_res (T))
 
-let _ = pr_F (list_of_string "a:=0")
+let _ = pr_V (list_of_string "a:=0")
 
 let pr_A: (bmexp, char) ranalist =
   (pr_C)
   +| (pr_V ++> fun a -> epsilon_res (Exp a))
 
+let _ = pr_A(list_of_string "b:=1;")
+
 let rec pr_F: (wbm, char) ranalist = fun l -> l |>
-  (pr_V ++> fun a -> terminal ':' --> terminal '=' -+> pr_A ++> fun b -> pr_H ++> fun c -> epsilon_res (MSeq((MAssign(a, b)),c)))
-  +| (terminal 'i' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' --> terminal '{' -+> pr_I ++> fun c -> terminal '}' -+> pr_I ++> fun d -> epsilon_res (MSeq(MIf (a, b, c), d)))
-  +| (terminal 'w' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' -+> pr_I ++> fun d -> epsilon_res (MSeq(MWhile(a,b), d)))
+  (pr_V ++> fun a -> terminal ':' --> terminal '=' -+> pr_A ++> fun b -> pr_H ++> fun c -> (if (c=MSkip) then  epsilon_res (MAssign(a, b)) else epsilon_res (MSeq((MAssign(a, b)),c)) ))
+  +| (terminal 'i' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' --> terminal '{' -+> pr_I ++> fun c -> terminal '}' -+> pr_I ++> fun d ->(if(d=MSkip) then epsilon_res (MIf (a, b, c)) else epsilon_res (MSeq(MIf (a, b, c), d))))
+  +| (terminal 'w' --> terminal '(' -+> pr_A ++> fun a -> terminal ')' --> terminal '{' -+> pr_I ++> fun b -> terminal '}' -+> pr_I ++> fun d -> (if(d=MSkip) then epsilon_res (MWhile(a,b)) else   epsilon_res (MSeq(MWhile(a,b), d))) )
 and pr_H: (wbm, char) ranalist = fun l -> l |>
   (terminal ';' -+> pr_F ++> fun a -> epsilon_res (a))
   +| epsilon_res MSkip
@@ -213,4 +240,7 @@ and pr_I: (wbm, char) ranalist = fun l -> l |>
   (pr_F)
   +| epsilon_res MSkip
 
-let _ = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{}}a:=1;")
+let _ = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{}a:=0}a:=1;")
+let _ = pr_F (list_of_string "a:=1")
+let _ = pr_F (list_of_string "i(c){c:=0;a:=b}{}")
+let _ = pr_F (list_of_string "w(a){i(c){c:=0;a:=b}{}a:=0}")
