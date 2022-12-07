@@ -157,6 +157,22 @@ I::= F
      | eps
  *)
 
+
+(* Exercie 1.1.4 
+
+
+ C ::= ’0’ | ’1’
+ V ::= ’a’ | ’b’ | ’c’ | ’d’
+ A ::= C | V
+ E ::= T E'
+ E' ::= '+'T |eps 
+ T ::= F T'
+ T' ::= '.' F| eps 
+ F ::= ’!’ F | A | ’(’ E ’)’
+
+
+ *)
+
   (* Exercice 1.2.1 *)
           
 (* if exp then P else Q.
@@ -210,6 +226,11 @@ let _ = p_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{b:=0;c:=a}}")
 let _ = p_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;c:=a}c:=0}{b:=0;c:=a}}")
 let _ = p_F (list_of_string "a:=1;b:=1;")
 
+
+
+(** Exercice 2.1.1 **)
+
+
 let pr_V: (bmvar, char) ranalist =
   
   (terminal 'a' -+> epsilon_res (A))
@@ -240,7 +261,168 @@ and pr_I: (wbm, char) ranalist = fun l -> l |>
   (pr_F)
   +| epsilon_res MSkip
 
+
+(** Exercice 2.1.2 **)
+
 let _ = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{}a:=0}a:=1;")
 let _ = pr_F (list_of_string "a:=1")
 let _ = pr_F (list_of_string "i(c){c:=0;a:=b}{}")
 let _ = pr_F (list_of_string "w(a){i(c){c:=0;a:=b}{}a:=0}")
+
+
+             (** Exercice 2.1.3 **)
+
+(* Grammaire du langage Whileb 
+
+
+ C ::= ’0’ | ’1’
+ V ::= ’a’ | ’b’ | ’c’ | ’d’
+ A ::= C | V
+ E ::= T En
+ En ::= '+'T |eps 
+ T ::= Fn Tn
+ Tn ::= '.' Fn| eps 
+ Fn ::= ’!’ Fn | A | ’(’ E ’)’
+F::= V ':=' Fn H
+     | 'i(' Fn '){' I '}{' I '}' I
+     | 'w(' Fn '){' I '}' I
+H::= ; F
+     | eps
+I::= F
+     | eps
+
+ *)
+
+(* Nouveaux types pour représenter les expressions dans whileb *)
+
+type bexp =
+  | Exp of bmvar
+  | F (*false*)
+  | T (*true*)
+  | Bnot of bexp
+  | Band of bexp * bexp
+  | Bor of bexp * bexp
+  | Eps
+
+type wb =
+  | MSkip 
+  | MAssign of bmvar * bexp
+  | MSeq of wb * wb
+  | MIf of bexp * wb * wb
+  | MWhile of bexp * wb
+
+(* Analyseur syntaxique de whileb *)
+
+let pr_Vb: (bmvar, char) ranalist =
+  
+  (terminal 'a' -+> epsilon_res (A))
+  +| (terminal 'b' -+> epsilon_res (B))
+  +| (terminal 'c' -+> epsilon_res (C))
+  +| (terminal 'd' -+> epsilon_res (D))
+
+
+let pr_Cb: (bexp, char) ranalist =
+  (terminal '0' -+> epsilon_res (F))
++| (terminal '1' -+> epsilon_res (T))
+
+let _ = pr_Vb (list_of_string "a:=0")
+
+let pr_Ab: (bexp, char) ranalist =
+  (pr_Cb)
+  +| (pr_Vb ++> fun a -> epsilon_res (Exp a))
+
+
+    
+let rec pr_E: (bexp, char) ranalist = fun l -> l |>
+  (pr_T ++> fun a -> pr_EN ++> fun b -> (if b=Eps then (epsilon_res a) else (epsilon_res (Bor(a, b)))))
+and pr_EN: (bexp, char) ranalist = fun l -> l |>
+  (terminal '+' -+> pr_T ++> fun a -> epsilon_res a)
+  +| (epsilon_res Eps)
+and pr_T: (bexp, char) ranalist = fun l -> l |>
+  (pr_FN ++> fun a -> pr_TN ++> fun b -> (if b=Eps then (epsilon_res a) else (epsilon_res (Band(a, b)))))
+and pr_TN: (bexp, char) ranalist = fun l -> l |>
+  (terminal '.' -+> pr_FN ++> fun a -> epsilon_res a)
+  +| (epsilon_res Eps)
+and pr_FN: (bexp, char) ranalist = fun l -> l |>
+  (terminal '!' -+> pr_FN ++> fun a -> epsilon_res (Bnot(a)))
+  +| (pr_Ab)
++| (terminal '(' -+> pr_E ++> fun a -> terminal ')' -+> epsilon_res a)
+
+let rec pr_Fb: (wb, char) ranalist = fun l -> l |>
+  (pr_Vb ++> fun a -> terminal ':' --> terminal '=' -+> pr_FN ++> fun b -> pr_Hb ++> fun c -> (if (c=MSkip) then  epsilon_res (MAssign(a, b)) else epsilon_res (MSeq((MAssign(a, b)),c)) ))
+  +| (terminal 'i' --> terminal '(' -+> pr_FN ++> fun a -> terminal ')' --> terminal '{' -+> pr_Ib ++> fun b -> terminal '}' --> terminal '{' -+> pr_Ib ++> fun c -> terminal '}' -+> pr_Ib ++> fun d ->(if(d=MSkip) then epsilon_res (MIf (a, b, c)) else epsilon_res (MSeq(MIf (a, b, c), d))))
+  +| (terminal 'w' --> terminal '(' -+> pr_FN ++> fun a -> terminal ')' --> terminal '{' -+> pr_Ib ++> fun b -> terminal '}' -+> pr_Ib ++> fun d -> (if(d=MSkip) then epsilon_res (MWhile(a,b)) else   epsilon_res (MSeq(MWhile(a,b), d))) )
+and pr_Hb: (wb, char) ranalist = fun l -> l |>
+  (terminal ';' -+> pr_Fb ++> fun a -> epsilon_res (a))
+  +| epsilon_res MSkip
+and pr_Ib: (wb, char) ranalist = fun l -> l |>
+  (pr_Fb)
+  +| epsilon_res MSkip
+
+let _ = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(!a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;c:=a}c:=0}{b:=0;c:=a}}")
+
+let _ = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" )
+
+
+    (***  2.2 Exécution d'un programme WHILEb **)
+
+(*Exercice 2.2.1*)
+(* Nous allons représenter l'état du programme par une liste dans laquelle chaque case contient T ou F (true ou false). la valeur de la variable représenté par la i ème lettre de l'alphabet est contenue dans la case i 
+N si il n y a pas encore de valeur défini *)
+
+type wbool = True | False | None
+type state = wbool list
+
+(** La fonction get x s rend la valeur de x dans s. *)
+
+let get = fun (x : bmexp) (s : state) ->
+  match x with
+  |T -> True
+  |F -> False
+  |Exp v -> (match v with
+             |A -> (match s with |a::s' -> a | _ -> raise Echec)          
+             |B ->  (match s with |a::b :: s' -> b | _ -> raise Echec)            
+             |C ->  (match s with |a::b :: c :: s' -> c | _ -> raise Echec)            
+             |D ->  (match s with |a::b::c::d::s' -> d | _ -> raise Echec) )
+
+
+let _ = get (Exp C) [True;True;None;True]
+
+
+
+(*La mise à jour d'une variable v par un nouvel entier n dans un état s
+    s'écrit 'update s v n'
+    Cette fonction n'échoue jamais et écrit la valeur à sa place même
+    si elle n'est pas encore définie dans l'état *)
+
+let update = fun (s:state) (v:bmvar) (n:wbool) ->
+  match v with
+  |A -> (match s with |a::s' -> n::s' | _ -> n::[])
+  |B -> (match s with |a::b::s' -> a::n::s' |a::[] -> a::n::[] | _ ->  None::n::[] )
+  |C -> (match s with |a::b::c::s' -> a::b::n::s' |a::b::s' -> a::b::n::s' |a::[] -> a::None::n::[] | _ ->  None::None::n::[])
+  |D -> (match s with |a::b::c::d::s' -> a::b::c::n::s' |a::b::c::s' -> a::b::c::n::s' |a::b::[] -> a::b::None::n::[] | a::[] ->  None::None::None::n::[] | _ -> None::None::None::n::[])
+
+let _ = Exp (A)
+
+let rec sn_update = fun (p : wbm) (s : state) ->
+  match p with
+  |MSkip -> s
+  |MAssign(a,b) ->  update s a (get b s)
+  |MSeq (w1,w2) -> sn_update w2 (sn_update w1 s)
+  |MIf (b,w1,w2) ->( match (get b s) with
+                    |True -> sn_update w1 s
+                    |False -> sn_update w2 s
+                    |_ -> raise Echec )
+  |MWhile (b,w) as i -> (match (get b s) with
+                        |True -> let s1 = (sn_update w s) in sn_update i s1
+                        |False -> s
+                        |_ -> raise Echec )
+
+
+let s = [True;True]
+let (w,l) = pr_F (list_of_string "i(a){b:=c;a:=c}{}") in sn_update w s 
+let (w1,l1) = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{a:=0}}a:=1;") in sn_update w1 s
+
+
+      (*** Exercice 2.2.2 ***)
+

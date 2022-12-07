@@ -86,19 +86,25 @@ C ::= '0' | '1'
 V ::= 'a' | 'b' | 'c' | 'd'
 A ::= C | V
 
-E::= EN 
-     | T
-EN::= E '+' T
-T::= TN
-     | FN
-TN::= T '.' FN
-FN::= '!' FN
-     | A
-     | '(' E ')'
+E ::= T E'
+E' ::= '+' T |eps
+T ::= F T'
+T' ::= '.' F | eps *)
 
-F::= V ':=' FN H
-     | 'i(' FN '){' I '}{' I '}' I
-     | 'w(' FN '){' I '}' I
+(* Exercie 1.1.4 
+
+
+ C ::= ’0’ | ’1’
+ V ::= ’a’ | ’b’ | ’c’ | ’d’
+ A ::= C | V
+ E ::= T E'
+ E' ::= '+'T |eps 
+ T ::= G T'
+ T' ::= '.' G| eps 
+ G ::= ’!’ G | A | ’(’ E ’)’
+F::= V ':=' G H
+     | 'i(' G '){' I '}{' I '}' I
+     | 'w(' G '){' I '}' I
 H::= ; F
      | eps
 I::= F
@@ -145,6 +151,8 @@ let pr_A: (bexp, char) ranalist =
   (pr_C)
   +| (pr_V ++> fun a -> epsilon_res (Exp a))
 
+
+    
 let rec pr_E: (bexp, char) ranalist = fun l -> l |>
   (pr_T ++> fun a -> pr_EN ++> fun b -> (if b=Eps then (epsilon_res a) else (epsilon_res (Bor(a, b)))))
 and pr_EN: (bexp, char) ranalist = fun l -> l |>
