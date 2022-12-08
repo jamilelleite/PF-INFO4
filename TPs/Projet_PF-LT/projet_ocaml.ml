@@ -359,7 +359,7 @@ and pr_Ib: (wb, char) ranalist = fun l -> l |>
   (pr_Fb)
   +| epsilon_res MSkip
 
-let _ = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(!a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;c:=a}c:=0}{b:=0;c:=a}}")
+let _ = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;a:=0}c:=0}{b:=0;c:=a}}")
 
 let _ = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" )
 
@@ -370,15 +370,15 @@ let _ = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" )
 (* Nous allons représenter l'état du programme par une liste dans laquelle chaque case contient T ou F (true ou false). la valeur de la variable représenté par la i ème lettre de l'alphabet est contenue dans la case i 
 N si il n y a pas encore de valeur défini *)
 
-type wbool = True | False | None
-type state = wbool list
+   
+type state = bool list
 
 (** La fonction get x s rend la valeur de x dans s. *)
 
 let get = fun (x : bmexp) (s : state) ->
   match x with
-  |T -> True
-  |F -> False
+  |T -> true
+  |F -> false
   |Exp v -> (match v with
              |A -> (match s with |a::s' -> a | _ -> raise Echec)          
              |B ->  (match s with |a::b :: s' -> b | _ -> raise Echec)            
@@ -386,7 +386,7 @@ let get = fun (x : bmexp) (s : state) ->
              |D ->  (match s with |a::b::c::d::s' -> d | _ -> raise Echec) )
 
 
-let _ = get (Exp C) [True;True;None;True]
+let _ = get (Exp C) [true;true;false;true]
 
 
 
@@ -395,12 +395,12 @@ let _ = get (Exp C) [True;True;None;True]
     Cette fonction n'échoue jamais et écrit la valeur à sa place même
     si elle n'est pas encore définie dans l'état *)
 
-let update = fun (s:state) (v:bmvar) (n:wbool) ->
+let update = fun (s:state) (v:bmvar) (n:bool) ->
   match v with
   |A -> (match s with |a::s' -> n::s' | _ -> n::[])
-  |B -> (match s with |a::b::s' -> a::n::s' |a::[] -> a::n::[] | _ ->  None::n::[] )
-  |C -> (match s with |a::b::c::s' -> a::b::n::s' |a::b::s' -> a::b::n::s' |a::[] -> a::None::n::[] | _ ->  None::None::n::[])
-  |D -> (match s with |a::b::c::d::s' -> a::b::c::n::s' |a::b::c::s' -> a::b::c::n::s' |a::b::[] -> a::b::None::n::[] | a::[] ->  None::None::None::n::[] | _ -> None::None::None::n::[])
+  |B -> (match s with |a::b::s' -> a::n::s' |a::[] -> a::n::[] | _ ->  false::n::[] )
+  |C -> (match s with |a::b::c::s' -> a::b::n::s' |a::b::s' -> a::b::n::s' |a::[] -> a::false::n::[] | _ ->  false::false::n::[])
+  |D -> (match s with |a::b::c::d::s' -> a::b::c::n::s' |a::b::c::s' -> a::b::c::n::s' |a::b::[] -> a::b::false::n::[] | a::[] ->  false::false::false::n::[] | _ -> false::false::false::n::[])
 
 let _ = Exp (A)
 
@@ -410,19 +410,53 @@ let rec sn_update = fun (p : wbm) (s : state) ->
   |MAssign(a,b) ->  update s a (get b s)
   |MSeq (w1,w2) -> sn_update w2 (sn_update w1 s)
   |MIf (b,w1,w2) ->( match (get b s) with
-                    |True -> sn_update w1 s
-                    |False -> sn_update w2 s
-                    |_ -> raise Echec )
+                    |true -> sn_update w1 s
+                    |false -> sn_update w2 s )
   |MWhile (b,w) as i -> (match (get b s) with
-                        |True -> let s1 = (sn_update w s) in sn_update i s1
-                        |False -> s
-                        |_ -> raise Echec )
+                        |true -> let s1 = (sn_update w s) in sn_update i s1
+                        |false -> s )
 
 
-let s = [True;True]
+let s = [true;true;false;true]
 let (w,l) = pr_F (list_of_string "i(a){b:=c;a:=c}{}") in sn_update w s 
 let (w1,l1) = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{a:=0}}a:=1;") in sn_update w1 s
 
 
       (*** Exercice 2.2.2 ***)
 
+let rec evalB = fun (b : bexp) (s: state) ->
+  match b with
+  |Exp v -> (match v with
+             |A -> (match s with |a::s' -> a | _ -> raise Echec)          
+             |B ->  (match s with |a::b :: s' -> b | _ -> raise Echec)            
+             |C ->  (match s with |a::b :: c :: s' -> c | _ -> raise Echec)            
+             |D ->  (match s with |a::b::c::d::s' -> d | _ -> raise Echec))
+  |T -> true
+  |F -> false
+  |Bnot b1 -> not (evalB b1 s)
+  |Band (b1, b2) -> (evalB b1 s) && (evalB b2 s)
+  |Bor (b1, b2) -> (evalB b1 s) || (evalB b2 s)
+  |Eps -> false
+
+
+
+let rec sn_updateb = fun (p : wb) (s : state) ->
+  match p with
+  |MSkip -> s
+  |MAssign(a,b) ->  update s a (evalB b s)
+  |MSeq (w1,w2) -> sn_updateb w2 (sn_updateb w1 s)
+  |MIf (b,w1,w2) ->( match (evalB b s) with
+                    |true -> sn_updateb w1 s
+                    |false -> sn_updateb w2 s )
+  |MWhile (b,w) as i -> (match (evalB b s) with
+                        |true -> let s1 = (sn_updateb w s) in sn_updateb i s1
+                        |false -> s )
+
+let s = [true;true;false;true]
+
+let (w,l) = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" ) in sn_updateb w s
+let (w,l) = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(!c){b:=0;a:=b}{b:=0;c:=b}}") in sn_updateb w s
+let (w,l) = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;a:=0}c:=0}{b:=0;c:=a}}") in sn_updateb w s
+
+
+           (** 2.4 Preuves sur la SOS (option 2) ***)
