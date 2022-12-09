@@ -65,6 +65,8 @@ let p_5: int panalist = pterminal 5
 let new_lf1 = p_5 lf1
 let _ = get 20 new_lf1
 
+let p_6: int panalist = pterminal 6
+
 let p_20: int panalist = pterminal 20
 let new_li1 = p_20 li1
 let _ = get 5 new_li1
@@ -90,6 +92,18 @@ let (-|) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
 let (-||) (a1: 'term panalist) (a2: 'term panalist) : 'term panalist =
   fun l -> try a1 l with Echec -> a2 l
 
+let p_5_6: int panalist =
+  p_5 -->> p_6
+
+let p_20_21: int panalist =
+  (pterminal 20) -->> (pterminal 21)
+
+let _ = get 10 (p_20_21 li1)
+
+let p_a: int panalist = p_5_6 -|| p_20_21
+let _ = get 10 (p_a li1)
+let _ = get 10 (p_a lf1)
+
 (* Répétition (étoile de Kleene) *)
 (* Grammaire :  A* ::=  A A* | ε *)
 let rec star (a : 'term analist) : 'term analist = fun l -> l |>
@@ -103,8 +117,13 @@ let rec star (a : 'term analist) : 'term analist = fun l -> l |>
 (* Le type des aspirateurs qui, en plus, rendent un résultat *)
 type ('res, 'term) ranalist = 'term list -> 'res * 'term list
 
+type ('res, 'term) pranalist = 'term lazylist -> 'res * 'term lazylist
+
 (* Un epsilon informatif *)
 let epsilon_res (info : 'res) : ('res, 'term) ranalist =
+  fun l -> (info, l)
+
+let pepsilon_res (info: 'res) : ('res, 'term) pranalist =
   fun l -> (info, l)
 
 (* Terminal conditionnel avec résultat *)
@@ -114,14 +133,25 @@ let terminal_res (f : 'term -> 'res option) : ('res, 'term) ranalist =
   | x :: l -> (match f x with Some y -> y, l | None -> raise Echec)
   | _ -> raise Echec
 
+let pterminal_res (f: 'term -> 'res option) : ('res, 'term) pranalist =
+  fun l -> match l() with
+           | Cons(x,l) -> (match f x with Some y -> y, l | None -> raise Echec)
+           | Nil -> raise Echec
+
 (* a1 sans résultat suivi de a2 donnant un résultat *)
 let ( -+>) (a1 : 'term analist) (a2 : ('res, 'term) ranalist) :
       ('res, 'term) ranalist =
   fun l -> let l = a1 l in a2 l
 
+let (-+>>) (a1: 'term panalist) (a2: ('res, 'term) pranalist) : ('res, 'term) pranalist =
+  fun l -> let l = a1 l in a2 l
+
 (* a1 rendant un résultat suivi de a2 rendant un résultat *)
 let (++>) (a1 : ('resa, 'term) ranalist) (a2 : 'resa -> ('resb, 'term) ranalist) :
       ('resb, 'term) ranalist =
+  fun l -> let (x, l) = a1 l in a2 x l
+
+let (++>>) (a1: ('resa, 'term) pranalist) (a2: 'resa -> ('resb, 'term) pranalist) : ('resb, 'term) pranalist =
   fun l -> let (x, l) = a1 l in a2 x l
 
 (* a1 rendant un résultat suivi de a2 sans résultat est peu utile *)
@@ -130,3 +160,7 @@ let (++>) (a1 : ('resa, 'term) ranalist) (a2 : 'resa -> ('resb, 'term) ranalist)
 let (+|) (a1 : ('res, 'term) ranalist) (a2 : ('res, 'term) ranalist) :
       ('res, 'term) ranalist =
   fun l -> try a1 l with Echec -> a2 l
+
+let (+||) (a1: ('res, 'term) pranalist) (a2: ('res, 'term) pranalist) : ('res, 'term) pranalist =
+  fun l -> try a1 l with Echec -> a2 l
+
