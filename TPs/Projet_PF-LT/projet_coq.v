@@ -1,4 +1,50 @@
 (*LT*)
+<<<<<<< HEAD
+=======
+
+(*
+|-------+---------------+---------------+-------------------+--------------|
+|       | ETEUBOU DUREL | KEMGNE DARRYL | LIMA LEITE JAMILE | NOM4-Prénom4 |
+|-------+---------------+--------------+--------------------+--------------|
+| 1.1.1 |               |              |                    |              |
+| 1.1.2 |               |              |                    |              |
+| 1.1.3 |               |              |                    |              |
+| 1.1.4 |               |              |                    |              |
+| 1.2.1 |               |              |                    |              |
+|-------+---------------+--------------+--------------------+--------------|
+| 2.1.1 |               |              |                    |              |
+| 2.1.2 |               |              |                    |              |
+| 2.1.3 |               |              |                    |              |
+| 2.1.4 |               |              |                    |              |
+| 2.2.1 |               |              |                    |              |
+| 2.2.2 |               |              |                    |              |
+| 2.3.1 |               |              |                    |              |
+| 2.3.2 |               |              |                    |              |
+| 2.3.3 |               |              |                    |              |
+| 2.4.1 |               |              |                    |              |
+| 2.4.2 |               |              |                    |              |
+| 2.4.3 |               |              |                    |              |
+| 2.4.4 |               |              |                    |              |
+|-------+---------------+--------------+--------------------+--------------|
+| 3.1   |               |              |                    |              |
+| 3.2   |               |              |                    |              |
+| 3.3.1 |               |              |                    |              |
+| 3.3.2 |               |              |                    |              |
+| 3.3.3 |               |              |                    |              |
+| 3.4   |               |              |                    |              |
+| 3.5   |               |              |                    |              |
+| 3.6   |               |              |                    |              |
+| 3.7.1 |               |              |                    |              |
+| 3.7.2 |               |              |                    |              |
+| 3.7.3 |               |              |                    |              |
+| 3.7.4 |               |              |                    |              |
+| 3.7.5 |               |              |                    |              |
+| 3.8   |               |              |                    |              |
+| 3.9   |               |              |                    |              |
+|-------+---------------+--------------+--------------------+--------------|
+*)
+
+>>>>>>> 55bf11ad8ac053ba5e56adb6ee8987c4bd09a16e
 (***** Option 1 *****)
 Require Import Bool Arith List.
 Import List.ListNotations.
@@ -398,6 +444,28 @@ Inductive SOS : config -> config -> Prop :=
               SOS_1 i1 s1 c2 -> SOS c2 c3 ->
               SOS (Inter i1 s1) c3.
 
+
+(* Exercice 2.4.1 *)
+
+Theorem SOS_trans : forall c1 c2 c3, SOS c1 c2 -> SOS c2 c3 -> SOS c1 c3.
+Proof.
+  intros.
+ induction H as [ | ].
+  - apply H0.
+  - eapply SOS_again.
+    +apply H.
+    + apply IHSOS.
+      apply H0.
+Qed.
+
+Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
+  SOS (Inter (Seq i1 i2) s1) (Inter i2 s2).
+Proof.
+Admitted.
+(* Enoncé : Pour tout i1, i2 (de type winstr ) s1 , s2 (deux états) si so (en partant de la configuration avec l'état s1 et le programme i1 à exécuter, on peut atteindre ou  ) alors  *)  
+
+
+
 (*Exercice 2.4.2*)
 (********* 1 *********)
 Lemma SOS_Pcarre_2_1er_tour : SOS (Inter Pcarre_2 [0;0;1]) (Inter Pcarre_2 [1; 1; 3]).
@@ -557,4 +625,47 @@ Proof.
   eapply SOS_trans.
   apply IHi.
   eapply SOS_Pcarre_inf_tour.
+
+
+
+
+(*** Exercice 2.4.4 Version fonctionnelle de SOS_1. ***)
+
+
+Fixpoint f_SOS_1 (i : winstr) (s : state) : config :=
+  match i with
+  | Skip => Final s
+  |Assign x a => Final (update s x (evalA a s))
+  |Seq i1 i2 => match (f_SOS_1 i1 s) with
+                 |Final s1 => Inter i2 s1                           
+                 |Inter i1' s1 => Inter (Seq i1' i2) s1 end
+                  
+  |If b i1 i2 => (if(evalB b s) then Inter i1 s else Inter i2 s )
+  |While b i => Inter (If b (Seq i (While b i)) Skip) s
+  end.
+
+
+Theorem F_SOS_Pcarre_inf_1er_tour : SOS (Inter Pcarre_inf [0;0;1]) (Inter Pcarre_inf [1; 1; 3]).
+Proof.
+  cbv. apply SOS_again with (f_SOS_1 (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))) [0; 0; 1]).
+  {apply SOS_While.}
+  cbn.
+   apply SOS_again with (f_SOS_1 (If Btrue
+          (Seq (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))
+             (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))))
+          Skip) [0; 0; 1] ).
+   {apply SOS_If_true. cbn. reflexivity.}
+   cbn.
+  apply SOS_again with (f_SOS_1 (Seq (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [0; 0; 1] ).
+  {apply SOS_Seqi. apply SOS_Seqf. eapply SOS_Assign.}
+  cbn.
+  apply SOS_again with (f_SOS_1 (Seq (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [1; 0; 1]).
+  {eapply SOS_Seqi.  eapply SOS_Seqf. apply SOS_Assign.}
+  cbn.
+   apply SOS_again with (f_SOS_1  (Seq (Assign 2 (Apl (Aco 2) (Ava 2)))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [1; 1; 1]).
+  { eapply SOS_Seqf.  eapply SOS_Assign.}
+   eapply SOS_stop.
 Qed.
