@@ -228,7 +228,15 @@ Proof. ring. Qed.
 Definition invar_cc n := [n; n*n; S (n+n)].
 Theorem SOS_corps_carre n : SOS (Inter corps_carre (invar_cc n)) (Final (invar_cc (S n))).
 Proof.
-Admitted.
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Assign.}
+  cbn. cbv[invar_cc]. rewrite Sn_carre. rewrite Sn_2.
+  apply SOS_stop.
+Qed.
 
 (** Celui-ci est court mais difficile. Laisser Admitted au début. *)
 Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
@@ -241,7 +249,9 @@ Lemma SOS_corps_carre_inter n i :
   SOS (Inter (Seq corps_carre i) (invar_cc n)) (Inter i (invar_cc (S n))).
 Proof.
   apply SOS_seq.
-Admitted.
+  cbv[invar_cc].
+  apply SOS_corps_carre. 
+Qed.
 
 Lemma eqnatb_refl : forall n, eqnatb n n = true.
 Proof.
@@ -252,13 +262,28 @@ Lemma SOS_Pcarre_tour :
   forall n i, eqnatb i n = false ->
   SOS (Inter (Pcarre n) (invar_cc i)) (Inter (Pcarre n) (invar_cc (S i))).
 Proof.
-Admitted.
+  intros n i.
+  intro eq.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {eapply SOS_If_true. cbn. rewrite eq. cbn. reflexivity.}
+  apply SOS_corps_carre_inter.
+Qed.
 
 (** Facile *)
 Theorem SOS_Pcarre_n_fini :
   forall n, SOS (Inter (Pcarre n) (invar_cc n)) (Final (invar_cc n)).
 Proof.
-Admitted.
+  intros n.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {apply SOS_If_false. cbn. rewrite eqnatb_refl. cbn. reflexivity.}
+  eapply SOS_again.
+  {apply SOS_Skip.}
+  apply SOS_stop.
+Qed.
 
 Theorem SOS_Pcarre_2_fin_V2 : SOS (Inter Pcarre_2 [0;0;1]) (Final [2;4;5]).
 Proof.
@@ -276,13 +301,34 @@ Lemma SOS_Pcarre_inf_tour :
   forall i,
   SOS (Inter Pcarre_inf (invar_cc i)) (Inter Pcarre_inf (invar_cc (S i))).
 Proof.
-Admitted.
+  intro i.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {apply SOS_If_true. reflexivity.}
+  eapply SOS_again.
+  {apply SOS_Seqi. apply SOS_Seqf. apply SOS_Assign.}
+  cbn. eapply SOS_again.
+  {apply SOS_Seqi. apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  cbn. cbv[Pcarre_inf]. cbv[invar_cc].
+  rewrite Sn_2. rewrite Sn_carre.
+  eapply SOS_stop.
+Qed.
 
 Theorem SOS_Pcarre_inf_n :
   forall i,
   SOS (Inter Pcarre_inf [0; 0; 1]) (Inter Pcarre_inf (invar_cc i)).
 Proof.
-Admitted.
+  intros i.
+  induction i as [ | ].
+  cbn. cbv[invar_cc]. cbv[Pcarre_inf].
+  apply SOS_stop.
+  eapply SOS_trans.
+  apply IHi.
+  eapply SOS_Pcarre_inf_tour.
+Qed.
 
 (** Énoncer et démontrer le théorème général pour Pcarre *)
 

@@ -1,7 +1,4 @@
 (*LT*)
-
-
-
 (***** Option 1 *****)
 Require Import Bool Arith List.
 Import List.ListNotations.
@@ -451,3 +448,113 @@ Qed.
 
 (** ** Exercice 2.4.3 ** **)
 (*** 1 ***)
+(** On a besoin de deux lemmes arithmétiques, démontrables avec la tactique ring. *)
+Lemma Sn_2 n : S n + S n = S (S (n + n)).
+Proof. ring. Qed.
+
+Lemma Sn_carre n : S n * S n = S (n + n + n * n).
+Proof. ring. Qed.
+
+Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
+  SOS (Inter (Seq i1 i2) s1) (Inter i2 s2).
+Proof.
+Admitted.
+
+Definition invar_cc n := [n; n*n; S (n+n)].
+Theorem SOS_corps_carre n : SOS (Inter corps_carre (invar_cc n)) (Final (invar_cc (S n))).
+Proof.
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Assign.}
+  cbn. cbv[invar_cc]. rewrite Sn_carre. rewrite Sn_2.
+  apply SOS_stop.
+Qed.
+
+(** Dans cette question, on cherche à prouvé que après une itération de la boucle while avec comme état initiale n := [n; n*n; S(n+n)], on arrive à un état final [S n; S(n + n) + S(n * n); S(S(S(n + n)))]**)
+
+(** ** 2 ** **)
+Lemma SOS_corps_carre_inter n i :
+  SOS (Inter (Seq corps_carre i) (invar_cc n)) (Inter i (invar_cc (S n))).
+Proof.
+  apply SOS_seq.
+  cbv[invar_cc].
+  apply SOS_corps_carre.
+Qed.
+
+(** On montre que lorsqu'on applique un tour de boucle à une configuration corps_carre; i, on arrive à une configuration où uniquement corps_carre a été appliqué et il reste à appliquer i. **)
+
+(*** 3 **)
+Lemma SOS_Pcarre_tour :
+  forall n i, eqnatb i n = false ->
+  SOS (Inter (Pcarre n) (invar_cc i)) (Inter (Pcarre n) (invar_cc (S i))).
+Proof.
+  intros n i.
+  intro eq.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {eapply SOS_If_true. cbn. rewrite eq. cbn. reflexivity.}
+  apply SOS_corps_carre_inter.
+Qed.
+(** Ceci veut dire que en effectuant une itération de SOS à la configuration intermédiare ayant pour etat (invar_cc i), nous aboutirons à une autre configuration intermédiaire ayant pour état (invar_cc (S i)) pour tout n et i des entiers naturels differents**)
+
+(*** 5 ***)
+Theorem SOS_Pcarre_n_fini :
+  forall n, SOS (Inter (Pcarre n) (invar_cc n)) (Final (invar_cc n)).
+Proof.
+  intros n.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {apply SOS_If_false. cbn. rewrite eqnatb_refl. cbn. reflexivity.}
+  eapply SOS_again.
+  {apply SOS_Skip.}
+  apply SOS_stop.
+Qed.
+
+(** Ce theoreme démontre que lorsque nous quittons d'une configuration intermédiare ayant pour etat (invar_cc n) nous arrivons, apres n itérations de  SOS, à un etat final (invar_cc n) **)
+
+(** Exercice 6 **)
+
+(** On utilise la propriete trnas de SOS afin de poser un etat transitoire, b, entre l'etat initiale et l'etat finale. Après on utilise tour pour effectuer une itération de SOS sur l'état de départ [0;0;1] et avoir l'etat qui le suit directement. Ensuite on utilise encore trans pour dire qu'il ya encore une etape intermédiaire entre l'etat qui vient d'etre trouvé et l'etat final [2;4;5]. Ensuite avec tour, on effectue une iteration sur l'etat courant pour avoir l'état qui suit. Ensuite, avec Pcarre_n_fini, on atteint l'etat finale [2;4;5] en n nombre d'etapes(etats intermédiaire). Puis on termine avec stop **)
+
+(********  7  ********)
+Lemma SOS_Pcarre_inf_tour :
+  forall i,
+  SOS (Inter Pcarre_inf (invar_cc i)) (Inter Pcarre_inf (invar_cc (S i))).
+Proof.
+  intro i.
+  eapply SOS_again.
+  {apply SOS_While.}
+  eapply SOS_again.
+  {apply SOS_If_true. reflexivity.}
+  eapply SOS_again.
+  {apply SOS_Seqi. apply SOS_Seqf. apply SOS_Assign.}
+  cbn. eapply SOS_again.
+  {apply SOS_Seqi. apply SOS_Seqf. apply SOS_Assign.}
+  eapply SOS_again.
+  {apply SOS_Seqf. apply SOS_Assign.}
+  cbn. cbv[Pcarre_inf]. cbv[invar_cc].
+  rewrite Sn_2. rewrite Sn_carre.
+  eapply SOS_stop.
+Qed.
+
+(** Il s'agit d'un theoreme tres semblable à tour, mais avec une possibilité de boucle infini. Elle demontre qu'en quittant d'une configuration intermédiaire ayant pour etat (invar_cc i) on arrive à une configuration intermédiaire ayant pour etat (invar_cc (S i)) en un nombre infini de boucle **)
+
+(**** 8 ****)
+
+Theorem SOS_Pcarre_inf_n :
+  forall i,
+  SOS (Inter Pcarre_inf [0; 0; 1]) (Inter Pcarre_inf (invar_cc i)).
+Proof.
+  intros i.
+  induction i as [ | ].
+  cbn. cbv[invar_cc]. cbv[Pcarre_inf].
+  apply SOS_stop.
+  eapply SOS_trans.
+  apply IHi.
+  eapply SOS_Pcarre_inf_tour.
+Qed.
