@@ -448,3 +448,6 @@ Proof.
   {eapply SOS_Skip.}
   eapply SOS_stop.
 Qed.
+
+(** ** Exercice 2.4.3 ** **)
+(*** 1 ***)
