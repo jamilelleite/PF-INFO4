@@ -530,3 +530,29 @@ Fixpoint f_SOS_1 (i : winstr) (s : state) : config :=
   |If b i1 i2 => (if(evalB b s) then Inter i1 s else Inter i2 s )
   |While b i => Inter (If b (Seq i (While b i)) Skip) s
   end.
+
+
+Theorem F_SOS_Pcarre_inf_1er_tour : SOS (Inter Pcarre_inf [0;0;1]) (Inter Pcarre_inf [1; 1; 3]).
+Proof.
+  cbv. apply SOS_again with (f_SOS_1 (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))) [0; 0; 1]).
+  {apply SOS_While.}
+  cbn.
+   apply SOS_again with (f_SOS_1 (If Btrue
+          (Seq (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))
+             (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))))
+          Skip) [0; 0; 1] ).
+   {apply SOS_If_true. cbn. reflexivity.}
+   cbn.
+  apply SOS_again with (f_SOS_1 (Seq (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2)))))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [0; 0; 1] ).
+  {apply SOS_Seqi. apply SOS_Seqf. eapply SOS_Assign.}
+  cbn.
+  apply SOS_again with (f_SOS_1 (Seq (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [1; 0; 1]).
+  {eapply SOS_Seqi.  eapply SOS_Seqf. apply SOS_Assign.}
+  cbn.
+   apply SOS_again with (f_SOS_1  (Seq (Assign 2 (Apl (Aco 2) (Ava 2)))
+          (While Btrue (Seq (Assign 0 (Apl (Aco 1) (Ava 0))) (Seq (Assign 1 (Apl (Ava 2) (Ava 1))) (Assign 2 (Apl (Aco 2) (Ava 2))))))) [1; 1; 1]).
+  { eapply SOS_Seqf.  eapply SOS_Assign.}
+   eapply SOS_stop.
+Qed.
