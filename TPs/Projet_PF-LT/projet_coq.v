@@ -401,6 +401,28 @@ Inductive SOS : config -> config -> Prop :=
               SOS_1 i1 s1 c2 -> SOS c2 c3 ->
               SOS (Inter i1 s1) c3.
 
+
+(* Exercice 2.4.1 *)
+
+Theorem SOS_trans : forall c1 c2 c3, SOS c1 c2 -> SOS c2 c3 -> SOS c1 c3.
+Proof.
+  intros.
+ induction H as [ | ].
+  - apply H0.
+  - eapply SOS_again.
+    +apply H.
+    + apply IHSOS.
+      apply H0.
+Qed.
+
+Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
+  SOS (Inter (Seq i1 i2) s1) (Inter i2 s2).
+Proof.
+Admitted.
+(* Enoncé : Pour tout i1, i2 (de type winstr ) s1 , s2 (deux états) si so (en partant de la configuration avec l'état s1 et le programme i1 à exécuter, on peut atteindre ou  ) alors  *)  
+
+
+
 (*Exercice 2.4.2*)
 (********* 1 *********)
 Lemma SOS_Pcarre_2_1er_tour : SOS (Inter Pcarre_2 [0;0;1]) (Inter Pcarre_2 [1; 1; 3]).
@@ -451,3 +473,20 @@ Qed.
 
 (** ** Exercice 2.4.3 ** **)
 (*** 1 ***)
+
+
+
+(*** Exercice 2.4.4 Version fonctionnelle de SOS_1. ***)
+
+
+Fixpoint f_SOS_1 (i : winstr) (s : state) : config :=
+  match i with
+  | Skip => Final s
+  |Assign x a => Final (update s x (evalA a s))
+  |Seq i1 i2 => match (f_SOS_1 i1 s) with
+                 |Final s1 => Inter i2 s1                           
+                 |Inter i1' s1 => Inter (Seq i1' i2) s1 end
+                  
+  |If b i1 i2 => (if(evalB b s) then Inter i1 s else Inter i2 s )
+  |While b i => Inter (If b (Seq i (While b i)) Skip) s
+  end.
