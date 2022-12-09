@@ -344,6 +344,62 @@ Proof.
       -- apply sn1.
       -- apply sn2.
 Qed.
+(* ----- 2.4 Preuves sur la SOS ----- *)
+
+
+(** * SOS (Sémantique opérationnelle à petits pas) du langage While *)
+
+(* 
+Intermédiaire : il reste un pas
+s, (i) -> s', (i')
+q, (i;i2) -> s', (i', i2)
+
+Final :
+s, (i) -> s'!
+s, (i;i2) -> s', (i2)
+*)
+
+Inductive config :=
+| Inter : winstr -> state -> config
+| Final : state -> config.
+
+(* La relation pour un pas de SOS *)
+
+Inductive SOS_1: winstr -> state -> config -> Prop :=
+| SOS_Skip     : forall s,
+                 SOS_1 Skip s (Final s)
+
+| SOS_Assign   : forall x a s,
+                 SOS_1 (Assign x a) s (Final (update s x (evalA a s)))
+
+| SOS_Seqf     : forall i1 i2 s s1,
+                 SOS_1 i1 s (Final s1) ->
+                 SOS_1 (Seq i1 i2) s (Inter i2 s1)
+| SOS_Seqi     : forall i1 i1' i2 s s1,
+                 SOS_1 i1 s (Inter i1' s1) ->
+                 SOS_1 (Seq i1 i2) s (Inter (Seq i1' i2) s1)
+
+| SOS_If_true  : forall b i1 i2 s,
+                 evalB b s = true  ->
+                 SOS_1 (If b i1 i2) s (Inter i1 s)
+| SOS_If_false : forall b i1 i2 s,
+                 evalB b s = false ->
+                 SOS_1 (If b i1 i2) s (Inter i2 s)
+
+| SOS_While    : forall b i s,
+                 SOS_1 (While b i) s (Inter (If b (Seq i (While b i)) Skip) s)
+.
+
+(** Fermeture réflexive-transitive de SOS_1 *)
+(** Cette sémantique donne toutes les configurations atteignables
+    par un (AST de) programme en partant d'un état initial.
+ *)
+
+Inductive SOS : config -> config -> Prop :=
+| SOS_stop  : forall c, SOS c c
+| SOS_again : forall i1 s1 c2 c3,
+              SOS_1 i1 s1 c2 -> SOS c2 c3 ->
+              SOS (Inter i1 s1) c3.
 
 (*Exercice 2.4.2*)
 (********* 1 *********)
