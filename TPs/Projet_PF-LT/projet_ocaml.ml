@@ -459,4 +459,4 @@ let (w,l) = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(!c){b:=0;a:=b}{b:=0;c:=
 let (w,l) = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;a:=0}c:=0}{b:=0;c:=a}}") in sn_updateb w s
 
 
-           (** 2.4 Preuves sur la SOS (option 2) ***)
+          
