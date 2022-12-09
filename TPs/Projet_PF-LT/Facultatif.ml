@@ -21,6 +21,14 @@ let rec (get: int -> 'a lazylist -> 'a list) = fun n l ->
   | Cons(a,m) -> if (n>1) then a::(get (n-1) m)
                  else a::[]
 
+(* liste fini *)
+let lf1 = range 5 10 
+let _ = get 10 lf1
+(* list infini *)
+let li1 = range 20 0
+let li2 = li1()
+let _ = get 10 li1
+
 (* Le type des aspirateurs (fonctions qui aspirent le préfixe d'une liste) *)
 type 'term analist = 'term list -> 'term list
 
@@ -51,6 +59,19 @@ let pterminal_cond (p: 'term -> bool) : 'term panalist = function
 (* non-terminal vide *)
 let epsilon : 'term analist = fun l -> l
 
+let pepsilon : 'term panalist = fun l -> l
+
+let p_5: int panalist = pterminal 5
+let new_lf1 = p_5 lf1
+let _ = get 20 new_lf1
+
+let p_20: int panalist = pterminal 20
+let new_li1 = p_20 li1
+let _ = get 5 new_li1
+
+let ts = pepsilon lf1
+let _ = get 10 ts
+
 (* ------------------------------------------------------------ *)
 (* Combinateurs d'analyseurs purs *)
 (* ------------------------------------------------------------ *)
@@ -59,8 +80,14 @@ let epsilon : 'term analist = fun l -> l
 let (-->) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
   fun l -> let l = a1 l in a2 l
 
+let (-->>) (a1: 'term panalist) (a2: 'term panalist) : 'term panalist =
+  fun l -> let l = a1 l in a2 l
+
 (* Choix entre a1 ou a2 *)
 let (-|) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
+  fun l -> try a1 l with Echec -> a2 l
+
+let (-||) (a1: 'term panalist) (a2: 'term panalist) : 'term panalist =
   fun l -> try a1 l with Echec -> a2 l
 
 (* Répétition (étoile de Kleene) *)
