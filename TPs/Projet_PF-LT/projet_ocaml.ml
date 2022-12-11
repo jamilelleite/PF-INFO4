@@ -491,14 +491,6 @@ let rec (get: int -> 'a lazylist -> 'a list) = fun n l ->
   | Cons(a,m) -> if (n>1) then a::(get (n-1) m)
                  else a::[]
 
-(* liste fini *)
-let lf1 = range 5 10 
-let _ = get 10 lf1
-(* list infini *)
-let li1 = range 20 0
-let li2 = li1()
-let _ = get 10 li1
-
 (* Le type des aspirateurs (fonctions qui aspirent le préfixe d'une liste) *)
 type 'term analist = 'term lazylist -> 'term lazylist
 
@@ -519,19 +511,6 @@ let terminal_cond (p: 'term -> bool) : 'term analist = function
 (* non-terminal vide *)
 let epsilon : 'term analist = fun l -> l
 
-let p_5: int analist = terminal 5
-let new_lf1 = p_5 lf1
-let _ = get 20 new_lf1
-
-let p_6: int analist = terminal 6
-
-let p_20: int analist = terminal 20
-let new_li1 = p_20 li1
-let _ = get 5 new_li1
-
-let ts = epsilon lf1
-let _ = get 10 ts
-
 (* ------------------------------------------------------------ *)
 (* Combinateurs d'analyseurs purs *)
 (* ------------------------------------------------------------ *)
@@ -543,18 +522,6 @@ let (-->) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
 (* Choix entre a1 ou a2 *)
 let (-|) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
   fun l -> try a1 l with Echec -> a2 l
-
-let p_5_6: int analist =
-  p_5 --> p_6
-
-let p_20_21: int analist =
-  (terminal 20) --> (terminal 21)
-
-let _ = get 10 (p_20_21 li1)
-
-let p_a: int analist = p_5_6 -| p_20_21
-let _ = get 10 (p_a li1)
-let _ = get 10 (p_a lf1)
 
 (* Répétition (étoile de Kleene) *)
 (* Grammaire :  A* ::=  A A* | ε *)
@@ -601,10 +568,50 @@ type aexp =
   | Const of int
   | Amu of aexp * aexp
 
+(* liste fini *)
+let lf1 = range 5 10 
+let _ = get 10 lf1
+(* list infini *)
+let li1 = range 20 0
+let _ = get 10 li1
+
+let p_5: int analist = terminal 5
+let new_lf1 = p_5 lf1
+let _ = get 20 new_lf1
+
+let p_6: int analist = terminal 6
+
+let p_5_6: int analist =
+  p_5 --> p_6
+
+let p_20_21: int analist =
+  (terminal 20) --> (terminal 21)
+
+let p_20: int analist = terminal 20
+let new_li1 = p_20 li1
+let _ = get 5 new_li1
+
+let ts = epsilon lf1
+let _ = get 10 ts
+
+let _ = get 10 (p_20_21 li1)
+
+let p_a: int analist = p_5_6 -| p_20_21
+let _ = get 10 (p_a li1)
+let _ = get 10 (p_a lf1)
+
 let pr_5: (aexp, int) ranalist = terminal 5 -+> epsilon_res (Const 5)
 let pr_6: (aexp, int) ranalist = terminal 6 -+> epsilon_res (Const 6)
 let pr_20: (aexp, int) ranalist = terminal 20 -+> epsilon_res (Const 20)
 let pr_21: (aexp, int) ranalist = terminal 21 -+> epsilon_res (Const 21)
+
+let pr_S:(aexp, int) ranalist = 
+  (pr_5 ++> fun a -> pr_6 ++> fun b -> epsilon_res (Amu(a,b)))
+  +| (pr_20 ++> fun a -> pr_21 ++> fun b -> epsilon_res (Amu(a,b)))
+
+let _ = pr_S li1
+let _ = pr_S lf1
+
 
 
 
