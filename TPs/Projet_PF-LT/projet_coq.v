@@ -3,43 +3,43 @@
 (*
 |-------+---------------+---------------+-------------------+--------------|
 |       | ETEUBOU DUREL | KEMGNE DARRYL | LIMA LEITE JAMILE | NOM4-Prénom4 |
-|-------+---------------+--------------+--------------------+--------------|
-| 1.1.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 1.1.2 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 1.1.3 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 1.1.4 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 1.2.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-|-------+---------------+--------------+--------------------+--------------|
-| 2.1.1 | xxxxxxxxxxxxx |              |  xxxxxxxxxxxxxxx   |              |
-| 2.1.2 | xxxxxxxxxxxxx |              |  xxxxxxxxxxxxxxx   |              |
-| 2.1.3 | xxxxxxxxxxxxx |              |  xxxxxxxxxxxxxxx   |              |
-| 2.1.4 |               |              |                    |              |
-| 2.2.1 | xxxxxxxxxxxxx |              |  xxxxxxxxxxxxxxx   |
-| 2.2.2 | xxxxxxxxxxxxx |              |  xxxxxxxxxxxxxxx   |              |
-| 2.3.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 2.3.2 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 2.3.3 |               |xxxxxxxxxxxxxx|                    |              |
-| 2.4.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 2.4.2 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |
-| 2.4.3 |               |xxxxxxxxxxxxxx|                    |              |
-| 2.4.4 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|                    |              |
-|-------+---------------+--------------+--------------------+--------------|
-| 3.1   |               |              |                    |              |
-| 3.2   | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
-| 3.3.1 |               |              |                    |              |
-| 3.3.2 |               |              |                    |              |
-| 3.3.3 |               |              |                    |              |
-| 3.4   |               |              |                    |              |
-| 3.5   |               |              |                    |              |
-| 3.6   |               |              |                    |              |
-| 3.7.1 |               |              |                    |              |
-| 3.7.2 |               |              |                    |              |
-| 3.7.3 |               |              |                    |              |
-| 3.7.4 |               |              |                    |              |
-| 3.7.5 |               |              |                    |              |
-| 3.8   |               |              |                    |              |
-| 3.9   |               |              |                    |              |
-|-------+---------------+--------------+--------------------+--------------|
+|-------+---------------+---------------+-------------------+--------------|
+| 1.1.1 |      X        |      X        |        X          |              |
+| 1.1.2 |      X        |      X        |        X          |              |
+| 1.1.3 |      X        |      X        |        X          |              |
+| 1.1.4 |      X        |      X        |        X          |              |
+| 1.2.1 |      X        |      X        |        X          |              |
+|-------+---------------+---------------+-------------------+--------------|
+| 2.1.1 |      X        |               |         X          |              |
+| 2.1.2 |      X        |               |         X          |              |
+| 2.1.3 |      X        |               |         X          |              |
+| 2.1.4 |               |               |                    |              |
+| 2.2.1 |      X        |               |         X          |
+| 2.2.2 |      X        |               |         X          |              |
+| 2.3.1 |      X        |      X        |         X          |              |
+| 2.3.2 |      X        |      X        |         X          |              |
+| 2.3.3 |               |      X        |                    |              |
+| 2.4.1 |      X        |      X        |         X          |              |
+| 2.4.2 |      X        |      X        |         X          |
+| 2.4.3 |               |      X        |                    |              |
+| 2.4.4 |      X        |      X        |                    |              |
+|-------+---------------+---------------+-------------------+--------------|
+| 3.1   |               |               |                    |              |
+| 3.2   |      X        |      X        |         X          |              |
+| 3.3.1 |               |               |                    |              |
+| 3.3.2 |               |               |                    |              |
+| 3.3.3 |               |               |                    |              |
+| 3.4   |               |               |                    |              |
+| 3.5   |               |               |                    |              |
+| 3.6   |               |               |                    |              |
+| 3.7.1 |               |               |                    |              |
+| 3.7.2 |               |               |                    |              |
+| 3.7.3 |               |               |                    |              |
+| 3.7.4 |               |               |                    |              |
+| 3.7.5 |               |               |                    |              |
+| 3.8   |               |               |                    |              |
+| 3.9   |               |               |                    |              |
+|-------+---------------+---------------+--------------------+--------------|
 *)
 
 (**** Nous avons fait l'option 2 ****)
@@ -391,7 +391,7 @@ Proof.
       -- apply sn1.
       -- apply sn2.
 Qed.
-(* ----- 2.4 Preuves sur la SOS (* Option 2 * ----- *)
+(* ----- 2.4 Preuves sur la SOS (* Option 2 * ----- *)*)
 
 
 (** * SOS (Sémantique opérationnelle à petits pas) du langage While *)
