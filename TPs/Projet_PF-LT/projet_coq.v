@@ -55,6 +55,12 @@ Inductive aexp :=
 | Amo : aexp -> aexp -> aexp
 .
 
+Definition pred n :=
+  match n with
+    | 0 => n
+    | S u => u
+  end.
+
 (** ** Syntaxe des expressions booléennes *)
 
 Inductive bexp :=
@@ -464,6 +470,13 @@ Admitted.
 
 
 (*Exercice 2.4.2*)
+Lemma eqnatb_refl : forall n, eqnatb n n = true.
+Proof.
+  intro n.
+  induction n.
+  reflexivity.
+  apply IHn.
+Qed.
 (********* 1 *********)
 Lemma SOS_Pcarre_2_1er_tour : SOS (Inter Pcarre_2 [0;0;1]) (Inter Pcarre_2 [1; 1; 3]).
 Proof.
@@ -519,11 +532,6 @@ Proof. ring. Qed.
 
 Lemma Sn_carre n : S n * S n = S (n + n + n * n).
 Proof. ring. Qed.
-
-Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
-  SOS (Inter (Seq i1 i2) s1) (Inter i2 s2).
-Proof.
-Admitted.
 
 Definition invar_cc n := [n; n*n; S (n+n)].
 Theorem SOS_corps_carre n : SOS (Inter corps_carre (invar_cc n)) (Final (invar_cc (S n))).
