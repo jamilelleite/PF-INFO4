@@ -230,6 +230,7 @@ let _ = p_F (list_of_string "a:=1;b:=1;")
 
 (** Exercice 2.1.1 **)
 
+(* Analyseur syntaxique pour le langage WhileB-- *)
 
 let pr_V: (bmvar, char) ranalist =
   
@@ -264,6 +265,8 @@ and pr_I: (wbm, char) ranalist = fun l -> l |>
 
 (** Exercice 2.1.2 **)
 
+(* Tests de l'analyseur*)
+
 let _ = pr_F (list_of_string "a:=1;b:=1;c:=1;w(a){i(c){c:=0;a:=b}{}a:=0}a:=1;")
 let _ = pr_F (list_of_string "a:=1")
 let _ = pr_F (list_of_string "i(c){c:=0;a:=b}{}")
@@ -272,8 +275,9 @@ let _ = pr_F (list_of_string "w(a){i(c){c:=0;a:=b}{}a:=0}")
 
              (** Exercice 2.1.3 **)
 
-(* Grammaire du langage Whileb 
+(* 
 
+Grammaire du langage Whileb 
 
  C ::= ’0’ | ’1’
  V ::= ’a’ | ’b’ | ’c’ | ’d’
@@ -359,6 +363,9 @@ and pr_Ib: (wb, char) ranalist = fun l -> l |>
   (pr_Fb)
   +| epsilon_res MSkip
 
+
+(* tests de l'analyseur*)
+
 let _ = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(a){c:=0;a:=b;i(c){c:=0;a:=b}{b:=0;a:=0}c:=0}{b:=0;c:=a}}")
 
 let _ = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" )
@@ -367,8 +374,8 @@ let _ = pr_Fb (list_of_string "a:=!(0+1);c:=(0.1);d:=((a+(b.0))+(!1))" )
     (***  2.2 Exécution d'un programme WHILEb **)
 
 (*Exercice 2.2.1*)
-(* Nous allons représenter l'état du programme par une liste dans laquelle chaque case contient T ou F (true ou false). la valeur de la variable représenté par la i ème lettre de l'alphabet est contenue dans la case i 
-N si il n y a pas encore de valeur défini *)
+
+(* Nous allons représenter l'état du programme par une liste de booléen. la valeur de la variable représenté par la i ème lettre de l'alphabet est contenue dans la case i *)
 
    
 type state = bool list
@@ -390,10 +397,8 @@ let _ = get (Exp C) [true;true;false;true]
 
 
 
-(*La mise à jour d'une variable v par un nouvel entier n dans un état s
-    s'écrit 'update s v n'
-    Cette fonction n'échoue jamais et écrit la valeur à sa place même
-    si elle n'est pas encore définie dans l'état *)
+(*La mise à jour d'une bmvar v par un nouvel booléen n dans un état s
+    s'écrit 'update s v n' *)
 
 let update = fun (s:state) (v:bmvar) (n:bool) ->
   match v with
@@ -403,6 +408,7 @@ let update = fun (s:state) (v:bmvar) (n:bool) ->
   |D -> (match s with |a::b::c::d::s' -> a::b::c::n::s' |a::b::c::s' -> a::b::c::n::s' |a::b::[] -> a::b::false::n::[] | a::[] ->  false::false::false::n::[] | _ -> false::false::false::n::[])
 
 let _ = Exp (A)
+
 
 let rec sn_update = fun (p : wbm) (s : state) ->
   match p with
@@ -460,9 +466,9 @@ let (w,l) = pr_Fb (list_of_string "a:=1;b:=1;c:=1;w(a){i(a){c:=0;a:=b;i(c){c:=0;
 
 
 
-                                                                                      (* 3. Extension Facultative *)
+    (* 3. Extension Facultative *)
 
-(* Analyse descendante récursive sur une liste avec des combinateurs *)
+(* Exercice 3.2 *)
 
 (* Utilitaire pour les tests *)
 
@@ -485,6 +491,14 @@ let rec (get: int -> 'a lazylist -> 'a list) = fun n l ->
   | Cons(a,m) -> if (n>1) then a::(get (n-1) m)
                  else a::[]
 
+(* liste fini *)
+let lf1 = range 5 10 
+let _ = get 10 lf1
+(* list infini *)
+let li1 = range 20 0
+let li2 = li1()
+let _ = get 10 li1
+
 (* Le type des aspirateurs (fonctions qui aspirent le préfixe d'une liste) *)
 type 'term analist = 'term lazylist -> 'term lazylist
 
@@ -505,6 +519,19 @@ let terminal_cond (p: 'term -> bool) : 'term analist = function
 (* non-terminal vide *)
 let epsilon : 'term analist = fun l -> l
 
+let p_5: int analist = terminal 5
+let new_lf1 = p_5 lf1
+let _ = get 20 new_lf1
+
+let p_6: int analist = terminal 6
+
+let p_20: int analist = terminal 20
+let new_li1 = p_20 li1
+let _ = get 5 new_li1
+
+let ts = epsilon lf1
+let _ = get 10 ts
+
 (* ------------------------------------------------------------ *)
 (* Combinateurs d'analyseurs purs *)
 (* ------------------------------------------------------------ *)
@@ -516,6 +543,18 @@ let (-->) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
 (* Choix entre a1 ou a2 *)
 let (-|) (a1 : 'term analist) (a2 : 'term analist) : 'term analist =
   fun l -> try a1 l with Echec -> a2 l
+
+let p_5_6: int analist =
+  p_5 --> p_6
+
+let p_20_21: int analist =
+  (terminal 20) --> (terminal 21)
+
+let _ = get 10 (p_20_21 li1)
+
+let p_a: int analist = p_5_6 -| p_20_21
+let _ = get 10 (p_a li1)
+let _ = get 10 (p_a lf1)
 
 (* Répétition (étoile de Kleene) *)
 (* Grammaire :  A* ::=  A A* | ε *)
@@ -562,46 +601,12 @@ type aexp =
   | Const of int
   | Amu of aexp * aexp
 
-(* liste fini *)
-let lf1 = range 5 10 
-let _ = get 10 lf1
-(* list infini *)
-let li1 = range 20 0
-let _ = get 10 li1
-
-let p_5: int analist = terminal 5
-let new_lf1 = p_5 lf1
-let _ = get 20 new_lf1
-
-let p_6: int analist = terminal 6
-
-let p_5_6: int analist =
-  p_5 --> p_6
-
-let p_20_21: int analist =
-  (terminal 20) --> (terminal 21)
-
-let p_20: int analist = terminal 20
-let new_li1 = p_20 li1
-let _ = get 5 new_li1
-
-let ts = epsilon lf1
-let _ = get 10 ts
-
-let _ = get 10 (p_20_21 li1)
-
-let p_a: int analist = p_5_6 -| p_20_21
-let _ = get 10 (p_a li1)
-let _ = get 10 (p_a lf1)
-
 let pr_5: (aexp, int) ranalist = terminal 5 -+> epsilon_res (Const 5)
 let pr_6: (aexp, int) ranalist = terminal 6 -+> epsilon_res (Const 6)
 let pr_20: (aexp, int) ranalist = terminal 20 -+> epsilon_res (Const 20)
 let pr_21: (aexp, int) ranalist = terminal 21 -+> epsilon_res (Const 21)
 
-let pr_S:(aexp, int) ranalist = 
-  (pr_5 ++> fun a -> pr_6 ++> fun b -> epsilon_res (Amu(a,b)))
-  +| (pr_20 ++> fun a -> pr_21 ++> fun b -> epsilon_res (Amu(a,b)))
 
-let _ = pr_S li1
-let _ = pr_S lf1
+
+
+

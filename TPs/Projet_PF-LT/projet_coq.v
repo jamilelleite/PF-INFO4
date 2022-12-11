@@ -4,7 +4,7 @@
 |-------+---------------+---------------+-------------------+--------------|
 |       | ETEUBOU DUREL | KEMGNE DARRYL | LIMA LEITE JAMILE | NOM4-Prénom4 |
 |-------+---------------+--------------+--------------------+--------------|
-| 1.1.1 | xxxxxxxxxxxx  |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
+| 1.1.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
 | 1.1.2 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
 | 1.1.3 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
 | 1.1.4 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
@@ -21,7 +21,7 @@
 | 2.3.3 |               |xxxxxxxxxxxxxx|                    |              |
 | 2.4.1 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |              |
 | 2.4.2 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|  xxxxxxxxxxxxxxx   |
-| 2.4.3 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|                    |              |
+| 2.4.3 |               |xxxxxxxxxxxxxx|                    |              |
 | 2.4.4 | xxxxxxxxxxxxx |xxxxxxxxxxxxxx|                    |              |
 |-------+---------------+--------------+--------------------+--------------|
 | 3.1   |               |              |                    |              |
@@ -42,7 +42,8 @@
 |-------+---------------+--------------+--------------------+--------------|
 *)
 
-(***** Option 1 *****)
+(**** Nous avons fait l'option 2 ****)
+
 Require Import Bool Arith List.
 Import List.ListNotations.
 (** ** Syntaxe des expressions arithétiques *)
@@ -390,7 +391,7 @@ Proof.
       -- apply sn1.
       -- apply sn2.
 Qed.
-(* ----- 2.4 Preuves sur la SOS ----- *)
+(* ----- 2.4 Preuves sur la SOS (* Option 2 * ----- *)
 
 
 (** * SOS (Sémantique opérationnelle à petits pas) du langage While *)
@@ -465,7 +466,7 @@ Fixpoint SOS_seq i1 i2 s1 s2 (so : SOS (Inter i1 s1) (Final s2)) :
   SOS (Inter (Seq i1 i2) s1) (Inter i2 s2).
 Proof.
 Admitted.
-(* Enoncé : Pour tout i1, i2 (de type winstr ) s1 , s2 (deux états) si so (en partant de la configuration avec l'état s1 et le programme i1 à exécuter, on peut atteindre ou  ) alors  *)  
+(* Enoncé : Si l'intruction i1 est atomique dans l'état s1 et donne l'état s2 , alors la prochaine configuration de la séquence d'instruction (Seq i1 i2) dans s1 est (Inter i2 s2) *)  
 
 
 
@@ -631,7 +632,7 @@ Proof.
   apply IHi.
   eapply SOS_Pcarre_inf_tour.
 
-
+Qed.
 
 
 (*** Exercice 2.4.4 Version fonctionnelle de SOS_1. ***)
